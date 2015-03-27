@@ -14,4 +14,4 @@ http://openshift.github.io/documentation/oo_cartridge_guide.html#nodejs
 
 # Instaltion
 
-use npm install first time to install modules.
+When you set up a new environment, use 'npm install'.
