@@ -7,6 +7,7 @@ var cfg             = require('./configmgr');
 var rest_routes     = require('./routes');
 
 // open database files
+
 cfg.cfgOpenDb();
 
 /**
@@ -17,13 +18,10 @@ var theApplication = function() {
     //  Scope.
     var self = this;
 
-    /*  ================================================================  */
-    /*  Helper functions.                                                 */
-    /*  ================================================================  */
+    //  Helper functions.
 
-    /**
-     *  Set up server IP address and port # using env variables/defaults.
-     */
+     // Set up server IP address and port # using env variables/defaults.
+
     self.setupVariables = function() {
         //  Set the environment variables we need.
         self.ipaddress = process.env.OPENSHIFT_NODEJS_IP;
@@ -133,7 +131,7 @@ var theApplication = function() {
     /**
      *  Initializes the sample application.
      */
-    self.initialize = function() {
+    self.initialize = function () {
         self.setupVariables();
         self.populateCache();
         self.setupTerminationHandlers();
@@ -154,9 +152,7 @@ var theApplication = function() {
         });
     };
 
-};   /*  Sample Application.  */
-
-
+};
 
 /**
  *  main():  Main code.

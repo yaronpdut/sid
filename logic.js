@@ -33,9 +33,14 @@ var getProjects = function (exclude_prj_code, callback)
 }
 
 
-var getVotes = function (callback) {
+var getVotes = function (callback, bunit) {
     var dbb = cfg.cfgGetDbHandle('voters');
-    dbb.find({}, function (err, docs) {
+
+    var findString =
+            bunit == undefined  ? {}
+                                : { bu : bunit };
+
+    dbb.find(findString, function (err, docs) {
         var results = [];
         for (var i = 0, len = docs.length; i < len; i++) {
             if (docs[i].voted != undefined && docs[i].voted != "") {

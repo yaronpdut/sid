@@ -4,6 +4,7 @@ var cfg     = require('./configmgr');
 
 REST_Votes = function (req, res) {
     var arrDistribution = []; // summed results
+
     logic.getVotes(function (lstVoters) {
         lstVoters.forEach(function (currentValue, index, array) {
             if (currentValue) {
@@ -12,7 +13,7 @@ REST_Votes = function (req, res) {
         });
         console.dir(arrDistribution);
         res.json(arrDistribution);
-    });
+    }, req.query.bu);
 }
 
 REST_Voters = function (req, res) {

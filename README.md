@@ -4,14 +4,16 @@ The OpenShift `nodejs` cartridge documentation can be found at:
 
 http://openshift.github.io/documentation/oo_cartridge_guide.html#nodejs
 
-# Open Isuues and Action Items
+# Open Issues and Action Items
 
-1. add vote round for "voters" api.
-2. add BU filter to "votes".
+1. add vote round for "voters" api - done
+2. add BU filter to "votes" - done
 3. add api for final votes.
 4. provide BU list.
 
 
-# Instaltion
+# Installation
 
-When you set up a new environment, use 'npm install'.
+When you set up a new environment, use `npm install`.
+
+rhc tail -a <app>
