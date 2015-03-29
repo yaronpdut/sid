@@ -30,9 +30,11 @@ var theApplication = function() {
         if (typeof self.ipaddress === "undefined") {
             //  Log errors on OpenShift but continue w/ 127.0.0.1 - this
             //  allows us to run/test the app locally.
-            console.warn('No OPENSHIFT_NODEJS_IP var, using 127.0.0.1');
+            console.log('|server| No OPENSHIFT_NODEJS_IP var, using 127.0.0.1');
             self.ipaddress = "127.0.0.1";
         };
+        console.log('|server| starting REST server IP address: %j Port: %j', self.ipaddress, self.port)
+
     };
 
 
@@ -63,11 +65,10 @@ var theApplication = function() {
      */
     self.terminator = function(sig){
         if (typeof sig === "string") {
-           console.log('%s: Received %s - terminating sample app ...',
-                       Date(Date.now()), sig);
+            console.log('|server| received %s - terminating sample app ...',Date(Date.now()), sig);
            process.exit(1);
         }
-        console.log('%s: Node server stopped.', Date(Date.now()) );
+        console.log('|server| node server stopped.', Date(Date.now()) );
     };
 
 
@@ -119,7 +120,7 @@ var theApplication = function() {
      */
     self.initializeServer = function() {
         self.createRoutes();
-        self.app = express.createServer();
+        self.app = express(); // .createServer() deprecated;
 
         //  Add handlers for the app (from the routes).
         for (var r in self.routes) {
@@ -147,8 +148,7 @@ var theApplication = function() {
     self.start = function() {
         //  Start the app on the specific interface (and port).
         self.app.listen(self.port, self.ipaddress, function() {
-            console.log('%s: Node server started on %s:%d ...',
-                        Date(Date.now() ), self.ipaddress, self.port);
+            console.log('|server| node server started on %s:%d ...',Date(Date.now() ), self.ipaddress, self.port);
         });
     };
 

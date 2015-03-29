@@ -3,14 +3,11 @@ var config = require('config')
     , Datastore = require('nedb') // https://github.com/louischatriot/nedb
     ;
 
-
-var /**
+/***
+ * Get Round Number
  * @return {number}
  */
-    /**
-     * @return {number}
-     */
-    cfgGetRoundNumber = function () {
+var cfgGetRoundNumber = function () {
         return 1;
         var voting = config.get('Voting');
         var d = new Date();
@@ -56,12 +53,12 @@ db_file_handles = [];
 
 
 cfgOpenDb = function () {
-    cfgGetDbRootDir(function (dirr) {
-        console.dir(dirr);
-        var d = dirr;
-        db_file_names.forEach(function (value) {
-            console.dir(value);
-            db_file_handles.push(new Datastore({filename: d + value, autoload: true}));
+    cfgGetDbRootDir(function (baseDirectoryName) {
+        console.log('|configuration| opening database. base dir: %s ', baseDirectoryName);
+        var d = baseDirectoryName;
+        db_file_names.forEach(function (dbFileName) {
+            console.log('|configuration| opening file %s', dbFileName);
+            db_file_handles.push(new Datastore({filename: d + dbFileName, autoload: true}));
         })
     });
 };
@@ -69,14 +66,6 @@ cfgOpenDb = function () {
 cfgGetDbHandle = function (name) {
     return db_file_handles[db_names.indexOf(name)];
 }
-// console.log(cfgGetRoundNumber());
-// cfgGetDbRootDir(function(dirr) { console.log(dirr); } );
-
-//cfgOpenDb();
-
-//setTimeout(function() {
-//  console.dir(db_file_handles);
-//},3000)
 
 module.exports.cfgGetRoundNumber = cfgGetRoundNumber;
 module.exports.cfgGetDbRootDir = cfgGetDbRootDir;
