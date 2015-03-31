@@ -10,9 +10,6 @@ var rest_routes     = require('./routes');
 
 cfg.cfgOpenDb();
 
-/**
- *  Define the sample application.
- */
 var theApplication = function() {
 
     //  Scope.

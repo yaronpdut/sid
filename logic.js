@@ -111,58 +111,78 @@ var updateUserRecWithVote = function (user, voted_project, callback) {
         });
 }
 
-var dbCheckIfUserCanVote4Project = function (user, project, callback) {
+var dbCheckIfUserCanVote4Project = function (user, project, callback)
+{
     // get project record
 
-    console.log("dbCheckIfUserCanVote4Project:");
-    console.log("user.project = " + user.project);
-    console.log("project = " + project);
+    var dbb;
 
-    // user cannot vote to its own project
-    if (user.project != null && user.project == project) {
-        console.log("Error: User can not vote to a project associated with");
-        callback(true, {reason: "Error: User can not vote to a project associated with"});
-        return;
+    switch(cfg.cfgGetRoundNumber())
+    {
+        case 1 :
+            // user cannot vote to its own project
+            if (user.project != null && user.project == project)
+            {
+                console.log("|logic| Error: User can not vote to a project associated with");
+                callback(true, {reason: "Error: User can not vote to a project associated with"});
+                return;
+            }
+
+            // find the project
+            dbb = cfg.cfgGetDbHandle('projects');
+            dbb.find({"project_code": project}, function (err, docs) {
+                if (docs.length == 0) {
+                    console.log("|logic| Error: Invalid Project Id");
+                    callback(true, {reason: "Error: Invalid Project Id. Project code not found"});
+                    return;
+                }
+
+                if (user.voted != '') {
+                    console.log("|logic| Error: User already voted");
+                    callback(true, {reason: "Error: User already voted"});
+
+                }
+                // verify user and project are from the same BU
+                if (user.bu != docs[0].bu) {
+                    console.log("|logic| Error: User cannot vote to a project not in its own BU");
+                    callback(true, {reason: "Error: User cannot vote to a project not in its own BU"});
+                }
+                else {
+                    console.log(false);
+                    callback(false);
+                }
+            });
+            break;
+        case 2:
+            // find the project in final projects
+            dbb = cfg.cfgGetDbHandle('finals');
+            dbb.find({"project_code": project}, function (err, docs)
+            {
+                if (docs.length == 0) {
+                    console.log("|logic| Error: Invalid Project Id");
+                    callback(true, {reason: "Error: Invalid Project Id. Project code not found"});
+                    return;
+                }
+            });
+                break;
     }
-
-    // find the project
-    var dbb = cfg.cfgGetDbHandle('projects');
-    dbb.find({"project_code": project}, function (err, docs) {
-        console.log("Looking for project in DB: " + JSON.stringify(docs));
-        if (docs.length == 0) {
-            console.log("Error: Invalid Project Id");
-            callback(true, {reason: "Error: Invalid Project Id "});
-            return;
-        }
-
-        // verify user and project are from the same BU
-        console.log("user.bu ", user.bu);
-        console.log("docs.bu", docs[0].bu);
-        if (user.bu != docs[0].bu) {
-            console.log("Error: User cannot vote to a project not in its own BU");
-            callback(true, {reason: "Error: User cannot vote to a project not in its own BU"});
-        }
-        else {
-            console.log(false);
-            callback(false);
-        }
-
-    });
-
 }
 
-var doVote = function (username, token, project, callback) {
+var doVote = function (username, token, project, callback)
+{
     console.log("|logic| do vote: %s %s %s ", username, token, project);
-    dbGetUserRecord(username, function (user) {
+
+    // retrieve user record first
+    dbGetUserRecord(username, function (user)
+    {
         if (!user || user.emp_number != token) {
-            console.log("invalid user name or token");
+            console.log("|logic| invalid user name or token");
             callback('{ result: "Error: invalid user name or token" }');
             return;
         }
 
-        console.log("dbCheckIfUserCanVote4Project");
-        dbCheckIfUserCanVote4Project(user, project, function (err, reason) {
-
+        dbCheckIfUserCanVote4Project(user, project, function (err, reason)
+        {
             if (err == false) {
                 console.log("updateUserRecWithVote");
                 updateUserRecWithVote(user, project, function (err) {
