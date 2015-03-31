@@ -98,6 +98,7 @@ var theApplication = function() {
         self.routes['/votes']   = rest_routes.REST_Votes;
         self.routes['/voters']  = rest_routes.REST_Voters;
         self.routes['/vote']    = rest_routes.REST_Vote;
+        self.routes['/project']    = rest_routes.REST_Project;
 
         self.routes['/asciimo'] = function(req, res) {
             var link = "http://i.imgur.com/kmbjB.png";

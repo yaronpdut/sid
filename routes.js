@@ -85,9 +85,33 @@ REST_Vote = function (req, res)
     }
 }
 
+/** Retrieve project details and associates users
+ *
+ * @param req
+ * @param res
+ * @constructor
+ */
+REST_Project = function(req, res)
+{
+    console.log("|rest| project API request project id=%s ", req.query.id);
+
+    if (!req.query.id) {
+        res.json({ result: "Error: Invalid query string parameters."});
+        console.warn("|rest| project API Invalid query string parameters id=%s", req.query.id);
+    }
+
+    logic.getProjectDetails(req.query.id, function(project_record) {
+        logic.getProjectMembers(req.query.id, function(err, docs) {
+            res.json( { project: project_record, members: docs });
+
+        });
+    });
+}
+
 
 module.exports.REST_Votes   = REST_Votes;
 module.exports.REST_Voters  = REST_Voters;
 module.exports.REST_Vote    = REST_Vote;
+module.exports.REST_Project = REST_Project;
 
 

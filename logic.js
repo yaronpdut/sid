@@ -21,7 +21,23 @@ var findVoter = function (userName, callback) {
 
 }
 
-var isProjectExist = function (proj_code, callback) {
+var getProjectMembers = function (proj_code, callback)
+{
+    var dbb = cfg.cfgGetDbHandle('voters');
+    dbb.find({project: proj_code}, function (err, docs)
+    {
+        if (docs) {
+            callback(true, docs);
+        }
+        else {
+            callback(false);
+        }
+    });
+
+}
+
+
+var getProjectDetails = function (proj_code, callback) {
     var dbb = cfg.cfgGetDbHandle('projects');
     dbb.findOne({project_code: proj_code}, function (err, docs) {
         console.log("|log| looking for project %s found=%j record=%j", proj_code, err, docs);
@@ -176,8 +192,8 @@ var doVote = function (username, token, project, callback)
     dbGetUserRecord(username, function (user)
     {
         if (!user || user.emp_number != token) {
-            console.log("|logic| invalid user name or token");
-            callback('{ result: "Error: invalid user name or token" }');
+            console.log("|logic| Invalid user name or token");
+            callback('{ result: "Error: Invalid user name or token" }');
             return;
         }
 
@@ -215,116 +231,13 @@ var dbGetFinalProjectToVote = function (callback) {
     });
 
 }
-// U N I T   T E S T I N G
-
-
 module.exports.findVoter = findVoter;
 module.exports.getVotes = getVotes;
 module.exports.getProjects = getProjects;
 module.exports.getBuProjects = getBuProjects;
 module.exports.doVote = doVote;
-module.exports.isProjectExist = isProjectExist;
+module.exports.getProjectDetails = getProjectDetails;
 module.exports.dbGetFinalProjectToVote = dbGetFinalProjectToVote;
+module.exports.getProjectMembers = getProjectMembers;
 
-console.log(">>>>>>>>>>>>>>>>>>>>>>> UNIT TESTS <<<<<<<<<<<<<<<<<<<<<<<<");
-
-var async = require('async');
-
-var fillDatabaseWithDummies = function () {
-    processProjects(function (dbb) {
-        var p;
-        for (var i = 1; i < 200; i++) {
-            p = {
-                project_code: i.toString(),
-                project_name: "My Project" + i.toString(),
-                description: "This is my project" + i.toString()
-            }
-            dbb.insert(p);
-        }
-
-    });
-
-    setTimeout(function () {
-        processVoters(function (dbb) {
-            for (var i = 1; i < 1800; i++) {
-                var e = (i * 100);
-                var p = {
-                    userName: "yaron.pdut@nice.com"
-                    , emp_number: e.toString()
-                    , site: "raanana"
-                    , bu: "mcr"
-                    , project: (Math.floor((Math.random() * 200) + 1)).toString()
-                    , voted: ""
-                    , final_vote: ""
-                };
-                dbb.insert(p);
-            }
-        });
-    }, 3000);
-
-}
-
-var unitTest = function () {
-// fillDatabaseWithDummies();
-
-    async.waterfall([
-        function (cb) {
-            findVoter("yaron.pdut1@nice.com", function (ok, ddoc) {
-                console.log(JSON.stringify(ddoc));
-                return cb()
-            });
-        }
-        , function (cb) {
-            findVoter("yaron.pdut3@nice.com", function (ok, ddoc) {
-                console.log(JSON.stringify(ddoc));
-                return cb()
-            });
-        }
-        , function (cb) {
-            findVoter("pdut3@nice.com", function (ok, ddoc) {
-                if (ddoc)
-                    console.log(JSON.stringify(ddoc));
-                else
-                    console.log("Not found");
-                return cb()
-            });
-        }
-
-        , function (cb) {
-            getProjects("2", function (ok, list) {
-                if (ok)
-                    console.log(JSON.stringify(list));
-                return cb();
-            });
-
-        }
-
-    ], function () {
-    });
-
-    getVotes(function (r) {
-        ;
-        console.log(r);
-    })
-
-
-    console.log("*********************************");
-    isProjectExist("60", function (c) {
-        console.log("*********************************");
-        console.log("60->" + c);
-    })
-    console.log("*********************************");
-    isProjectExist("91", function (c) {
-        console.log("*********************************");
-        console.log("91->" + c);
-
-    })
-    console.log("*********************************");
-    isProjectExist("182", function (c) {
-        console.log("*********************************");
-        console.log("182->" + c);
-
-    })
-
-}
 
