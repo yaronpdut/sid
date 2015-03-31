@@ -1,30 +1,60 @@
+var Datastore = require('nedb'), // https://github.com/louischatriot/nedb
+    cfg = require("./configmgr");
 
-var Datastore   = require('nedb'), // https://github.com/louischatriot/nedb
-    cfg         = require("./configmgr");
+/**
+ * Look for specific user in database
+ * @param userName
+ * @param callback
+ */
 
 var findVoter = function (userName, callback) {
     var dbb = cfg.cfgGetDbHandle('voters');
     dbb.findOne({userName: userName}, function (err, docs) {
-        if (docs)
+        console.log("|log| looking for voter %s found=%j docs=%j", userName, err, docs);
+        if (docs) {
             callback(true, docs);
-        else
+        }
+        else {
             callback(false);
+        }
     });
 
 }
 
-var isProjectExist = function(proj_code, callback)
-{
+var isProjectExist = function (proj_code, callback) {
     var dbb = cfg.cfgGetDbHandle('projects');
-    console.log("isProjectExist" + proj_code);
     dbb.findOne({project_code: proj_code}, function (err, docs) {
-        console.log("dbb.findOne({project_code: *** " + err + docs);
+        console.log("|log| looking for project %s found=%j record=%j", proj_code, err, docs);
         callback(docs);
     });
 }
 
-var getProjects = function (exclude_prj_code, callback)
+
+
+/**
+ * return list of projects user can vote, from its bu, excluding the project he assign to.
+ * 
+ **/
+
+var getBuProjects = function (userid, bunit, callback) 
 {
+    var dbb = cfg.cfgGetDbHandle('projects');
+    
+    // get user record
+    findVoter(userid, function (err, user_rec) {
+        // limit the projects
+        dbb.find({ $and: [{ bu: bunit }, { project_code: { $ne: user_rec.project } }] },
+        function (err, docs) {
+            callback(docs);
+        });
+    
+    });
+
+
+}
+
+
+var getProjects = function (exclude_prj_code, callback) {
     var dbb = cfg.cfgGetDbHandle('projects');
     dbb.find({project_code: {$ne: exclude_prj_code}}, function (err, docs) {
         callback(docs);
@@ -37,8 +67,8 @@ var getVotes = function (callback, bunit) {
     var dbb = cfg.cfgGetDbHandle('voters');
 
     var findString =
-            bunit == undefined  ? {}
-                                : { bu : bunit };
+        bunit == undefined ? {}
+            : {bu: bunit};
 
     dbb.find(findString, function (err, docs) {
         var results = [];
@@ -66,23 +96,22 @@ var dbGetUserRecord = function (username, callback) {
 
 }
 
-var updateUserRecWithVote = function(user, voted_project, callback)
-{
+var updateUserRecWithVote = function (user, voted_project, callback) {
     var dbb = cfg.cfgGetDbHandle('voters');
-        // user.voted = voted_project;
-        console.log(JSON.stringify(user));
-        dbb.update(
-            user,
-            { $set : {voted : voted_project}  },
-            {},
-            function (err, numReplaced) {
-                if(err) console.log("UPDATE: " + err);
-                else console.log("UPDATE numReplaced: " + numReplaced);
-                callback(err) });
+    // user.voted = voted_project;
+    console.log(JSON.stringify(user));
+    dbb.update(
+        user,
+        {$set: {voted: voted_project}},
+        {},
+        function (err, numReplaced) {
+            if (err) console.log("UPDATE: " + err);
+            else console.log("UPDATE numReplaced: " + numReplaced);
+            callback(err)
+        });
 }
 
-var dbCheckIfUserCanVote4Project = function(user, project, callback)
-{
+var dbCheckIfUserCanVote4Project = function (user, project, callback) {
     // get project record
 
     console.log("dbCheckIfUserCanVote4Project:");
@@ -90,56 +119,53 @@ var dbCheckIfUserCanVote4Project = function(user, project, callback)
     console.log("project = " + project);
 
     // user cannot vote to its own project
-    if(user.project != null && user.project == project)
-    {
+    if (user.project != null && user.project == project) {
         console.log("Error: User can not vote to a project associated with");
-        callback(true, { reason: "Error: User can not vote to a project associated with"});
+        callback(true, {reason: "Error: User can not vote to a project associated with"});
         return;
     }
 
     // find the project
     var dbb = cfg.cfgGetDbHandle('projects');
-        dbb.find({"project_code": project}, function (err, docs) {
-            console.log("Looking for project in DB: " + JSON.stringify(docs));
-            if(docs.length == 0) {
-                console.log("Error: Invalid Project Id");
-                callback(true, {reason: "Error: Invalid Project Id "});
-                return;
-            }
+    dbb.find({"project_code": project}, function (err, docs) {
+        console.log("Looking for project in DB: " + JSON.stringify(docs));
+        if (docs.length == 0) {
+            console.log("Error: Invalid Project Id");
+            callback(true, {reason: "Error: Invalid Project Id "});
+            return;
+        }
 
-            // verify user and project are from the same BU
-            console.log("user.bu ", user.bu);
-            console.log("docs.bu", docs[0].bu);
-            if(user.bu != docs[0].bu) {
-                console.log("Error: User cannot vote to a project not in its own BU");
-                callback(true, {reason: "Error: User cannot vote to a project not in its own BU"});
-            }
-            else {
-                console.log(false);
-                callback(false);
-            }
+        // verify user and project are from the same BU
+        console.log("user.bu ", user.bu);
+        console.log("docs.bu", docs[0].bu);
+        if (user.bu != docs[0].bu) {
+            console.log("Error: User cannot vote to a project not in its own BU");
+            callback(true, {reason: "Error: User cannot vote to a project not in its own BU"});
+        }
+        else {
+            console.log(false);
+            callback(false);
+        }
 
-        });
+    });
 
 }
 
-var doVote = function(username, token, project, callback)
-{
-    console.log("check if user exist");
-    dbGetUserRecord(username, function(user) {
-        if(!user || user.emp_number != token) {
+var doVote = function (username, token, project, callback) {
+    console.log("|logic| do vote: %s %s %s ", username, token, project);
+    dbGetUserRecord(username, function (user) {
+        if (!user || user.emp_number != token) {
             console.log("invalid user name or token");
             callback('{ result: "Error: invalid user name or token" }');
             return;
         }
 
         console.log("dbCheckIfUserCanVote4Project");
-        dbCheckIfUserCanVote4Project(user, project, function(err, reason){
+        dbCheckIfUserCanVote4Project(user, project, function (err, reason) {
 
-            if(err == false)
-            {
+            if (err == false) {
                 console.log("updateUserRecWithVote");
-                updateUserRecWithVote(user, project, function(err) {
+                updateUserRecWithVote(user, project, function (err) {
                     console.log(err);
                     callback('{ result: "OK" }');
                 })
@@ -150,7 +176,6 @@ var doVote = function(username, token, project, callback)
             }
 
         });
-
 
 
     });
@@ -176,16 +201,16 @@ var dbGetFinalProjectToVote = function (callback) {
 module.exports.findVoter = findVoter;
 module.exports.getVotes = getVotes;
 module.exports.getProjects = getProjects;
+module.exports.getBuProjects = getBuProjects;
 module.exports.doVote = doVote;
-module.exports.isProjectExist =isProjectExist;
+module.exports.isProjectExist = isProjectExist;
 module.exports.dbGetFinalProjectToVote = dbGetFinalProjectToVote;
 
 console.log(">>>>>>>>>>>>>>>>>>>>>>> UNIT TESTS <<<<<<<<<<<<<<<<<<<<<<<<");
 
 var async = require('async');
 
-var fillDatabaseWithDummies = function ()
-{
+var fillDatabaseWithDummies = function () {
     processProjects(function (dbb) {
         var p;
         for (var i = 1; i < 200; i++) {
@@ -199,7 +224,7 @@ var fillDatabaseWithDummies = function ()
 
     });
 
-    setTimeout(function() {
+    setTimeout(function () {
         processVoters(function (dbb) {
             for (var i = 1; i < 1800; i++) {
                 var e = (i * 100);
@@ -219,62 +244,63 @@ var fillDatabaseWithDummies = function ()
 
 }
 
-var unitTest = function()
-{
+var unitTest = function () {
 // fillDatabaseWithDummies();
 
-async.waterfall([
-    function (cb) {
-        findVoter("yaron.pdut1@nice.com", function (ok, ddoc) {
-            console.log(JSON.stringify(ddoc));
-            return cb()
-        });
-    }
-    , function (cb) {
-        findVoter("yaron.pdut3@nice.com", function (ok, ddoc) {
-            console.log(JSON.stringify(ddoc));
-            return cb()
-        });
-    }
-    , function (cb) {
-        findVoter("pdut3@nice.com", function (ok, ddoc) {
-            if(ddoc)
-               console.log(JSON.stringify(ddoc));
-            else
-                console.log("Not found");
-            return cb()
-        });
-    }
+    async.waterfall([
+        function (cb) {
+            findVoter("yaron.pdut1@nice.com", function (ok, ddoc) {
+                console.log(JSON.stringify(ddoc));
+                return cb()
+            });
+        }
+        , function (cb) {
+            findVoter("yaron.pdut3@nice.com", function (ok, ddoc) {
+                console.log(JSON.stringify(ddoc));
+                return cb()
+            });
+        }
+        , function (cb) {
+            findVoter("pdut3@nice.com", function (ok, ddoc) {
+                if (ddoc)
+                    console.log(JSON.stringify(ddoc));
+                else
+                    console.log("Not found");
+                return cb()
+            });
+        }
 
-    ,    function (cb) {
-        getProjects("2", function(ok, list) {
-            if(ok)
-                console.log(JSON.stringify(list));
-            return cb();
-        });
+        , function (cb) {
+            getProjects("2", function (ok, list) {
+                if (ok)
+                    console.log(JSON.stringify(list));
+                return cb();
+            });
 
-    }
+        }
 
-        ], function(){});
+    ], function () {
+    });
 
-    getVotes(function(r) {;
+    getVotes(function (r) {
+        ;
         console.log(r);
     })
 
 
     console.log("*********************************");
-    isProjectExist("60", function(c) {
+    isProjectExist("60", function (c) {
         console.log("*********************************");
         console.log("60->" + c);
     })
     console.log("*********************************");
-    isProjectExist("91", function(c) {
+    isProjectExist("91", function (c) {
         console.log("*********************************");
         console.log("91->" + c);
 
     })
     console.log("*********************************");
-    isProjectExist("182", function(c) {
+    isProjectExist("182", function (c) {
         console.log("*********************************");
         console.log("182->" + c);
 
@@ -282,18 +308,3 @@ async.waterfall([
 
 }
 
-// unitTest();
-/*
-processProjects(function(dbb) {
-    dbb.find({"project_code": 1}, function (err, docs)
-    {
-        console.log("********* look for project " + err + " " +  JSON.stringify(docs));
-
-    });
-    dbb.find({"project_code": 2}, function (err, docs)
-    {
-        console.log("********* look for project " + err + " " + JSON.stringify(docs));
-
-    });
-});
-*/

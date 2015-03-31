@@ -34,7 +34,7 @@ REST_Voters = function (req, res) {
     // look for specific user in database
     logic.findVoter(req.query.id, function (err, voter)
     {
-        console.log("|rest| voters err=%j result=%j", err, voter);
+        console.log("|rest| voters result=%j err=%j ", voter, err);
 
         if (!err) {
             console.warn("|rest| voters %j not found", req.query.id);
@@ -48,10 +48,10 @@ REST_Voters = function (req, res) {
                 res.json({result: "Found", user: voter, round: cfg.cfgGetRoundNumber()});
                 break;
             case 1: // first round, projects per BU
-                logic.getProjects(req.query.id, function (rr) {
+                logic.getBuProjects(req.query.id, voter.bu, function (rr) 
+                    {
                     res.json({result: "Found", user: voter, projects: rr, round: cfg.cfgGetRoundNumber()});
-
-                });
+                    });
                 break;
             case 2: // second round - final projects
                 logic.dbGetFinalProjectToVote(function (rr) {
@@ -63,11 +63,20 @@ REST_Voters = function (req, res) {
     });
 }
 
-REST_Vote = function (req, res) {
+/**
+ * Perform the actual voting
+ * @param req
+ * @param res
+ * @constructor
+ */
+REST_Vote = function (req, res)
+{
+    console.log("|rest| vote API request id=%s token=%s project=%s", req.query.id, req.query.token, req.query.project);
 
 // validate that query parameters do exist
     if (!req.query.id || !req.query.token || !req.query.project) {
         res.json({result: "Error: Invalid query string parameters."});
+        console.warn("|rest| vote API Invalid query string parameters id=%s token=%s project=%s", req.query.id, req.query.token, req.query.project);
     }
     else {
         logic.doVote(req.query.id, req.query.token, req.query.project, function (cb) {
