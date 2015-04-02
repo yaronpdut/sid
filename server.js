@@ -105,9 +105,15 @@ var theApplication = function() {
             res.send("<html><body><img src='" + link + "'></body></html>");
         };
 
-        self.routes['/'] = function(req, res) {
-            res.setHeader('Content-Type', 'text/html');
-            res.send(self.cache_get('index.html') );
+        self.routes['*'] = function(req, res) {
+            var url = req.originalUrl;
+            if(url==='/') {
+                url='/index.html';
+            }
+
+            url = url.indexOf('?')<0 ? url : url.substring(0,url.indexOf('?'));
+			res.contentType(url.substring(url.lastIndexOf('/')+1));
+			res.sendfile('./' + url);
         };
     };
 
