@@ -15,7 +15,7 @@ mainModel =  kendo.observable({
     voted: false,
     user: {},
     round:0,
-    project:{description:'george'},
+    project:{description:''},
     bob:'scott',
 
     login: function(){
@@ -25,15 +25,14 @@ mainModel =  kendo.observable({
             password = $("#password").val();
             $.ajax({
                 dataType: "json",
-                url: server + "voters?id=" + username
+                data: {id: username},
+                url: "voters"
             }).done(function(data) {
                 console.log(data);
-                console.log(data.user.emp_number, password);
                 if(data.user) {
                     if(data.user.emp_number==password) {
-                        console.log('1');
                         mainModel.round = data.round;
-                        mainModel.user = data.user;
+                        mainModel.set('user', data.user);
 
                         data.projects.sort(function(a,b) {
                             if (a.project_name < b.project_name) {
@@ -45,8 +44,6 @@ mainModel =  kendo.observable({
                             return 0;
                         });
 
-                        console.log('2');
-
                         $.each(data.projects, function(index, item) {
                             if(data.user.voted.length>0 && item.project_code===data.user.voted) {
                                 mainModel.set('project', item);
@@ -54,9 +51,6 @@ mainModel =  kendo.observable({
                             projectsDataSource.add(item);
                         });
 
-                        console.log('3');
-
-                        //todo fix
                         if(data.user.voted.length>0) {
                             kendoMobileApp.navigate('#voted-view', 'zoom');
                         } else {

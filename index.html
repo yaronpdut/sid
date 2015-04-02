@@ -63,23 +63,34 @@
             <p>Doc, Grumpy, Happy, Sleepy, Sneezy, Dopey</p>
 
             <h3>Location</h3>
-            <p>Richardson, TX</p>
+            <p data-bind="text:user.site"></p>
 
             <div class="buttons">
-                <a class="pinkish-button" data-role="button" data-bind="click: login">Vote for this application!</a><br />
+                <a class="pinkish-button" data-role="button" data-bind="click: vote">Vote for this application!</a><br />
             </div>
         </div>
 
-        <div class="no-back" data-role="view" data-title="Thank You" id="voted-view" data-model="mainModel" data-layout="main-layout">
-            <h1>Thanks for voting!!!</h1>
+        <div class="no-back" data-role="view" data-title="Thank You" id="voted-view" data-model="mainModel" data-layout="back-layout">
+            <h1>Thank you for voting</h1>
             <p>
-                You voted for '<span data-bind="text:project.project_name"></span>
-                <span data-bind="text:project.description"></span>'
+                Join us at the end of Ship It! day to see who won.
             </p>
         </div>
 
         <div class="no-about" data-role="view" data-title="About" id="about-view" data-layout="back-layout">
-            <h1>About goes here!!!!</h1>
+            <h1>About Ship It! NICE</h1>
+
+            <h2>Back End Engineering</h2>
+            <p>Yaron Pdut</p>
+
+            <h2>Front End Engineering</h2>
+            <p>Scott Walter</p>
+
+            <h2>Infrastructure</h2>
+            <p>Yaron Pdut</p>
+
+            <h2>Design</h2>
+            <p>Shafir Balitsky</p>
         </div>
 
         <div data-role="drawer" id="my-drawer" data-views="['projects-view']">
