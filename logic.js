@@ -1,5 +1,77 @@
+
 var Datastore = require('nedb'), // https://github.com/louischatriot/nedb
-    cfg = require("./configmgr");
+    cfg = require("./configmgr"),
+    fs = require('fs');
+
+
+var Logic = {
+    m_db_file_names : ["voters.json", "projects.json", "finals.json"],
+    m_db_names : ['voters', 'projects', 'finals'],
+    m_db_file_handles : [],
+
+
+    Logic : function()
+    {
+        this.openDb();
+    },
+    
+    
+    getDbRootDir : function (cb) {
+        var basePath = process.cwd();
+        var potentialDir = [
+            basePath + "/",
+            basePath + "/models/",
+            basePath + "/../models/"
+        ];
+        potentialDir.forEach(function (value, idx) {
+            fs.exists(value + 'voters.json', function (ex) {
+                if (ex)
+                    cb(potentialDir[idx]);
+            });
+        })
+    },
+    
+    
+    openDb : function () {
+        this.getDbRootDir(function (baseDirectoryName) {
+            console.log('|configuration| opening database. base dir: %s ', baseDirectoryName);
+            var d = baseDirectoryName;
+            m_db_file_names.forEach(function (dbFileName) {
+                console.log('|configuration| opening file %s', dbFileName);
+                m_db_file_handles.push(new Datastore({filename: d + dbFileName, autoload: true}));
+            })
+        });
+    },
+
+
+    getDbHandle : function (name) {
+        return m_db_file_handles[m_db_names.indexOf(name)];
+    },
+
+
+    findVoter : function (userName, callback) {
+        var dbb = cfg.cfgGetDbHandle('voters');
+            dbb.findOne({userName: userName}, function (err, docs) {
+                console.log("|log| looking for voter %s found=%j docs=%j", userName, err, docs);
+            if (docs) {
+                callback(true, docs);
+            }
+            else {
+                callback(false);
+            }
+        });
+
+    },
+
+    
+    
+}
+
+
+Logic.openDb();
+
+module.exports.Logic = Logic;
+
 
 /**
  * Look for specific user in database
