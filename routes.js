@@ -48,7 +48,7 @@ REST_Voters = function (req, res) {
                 res.json({result: "Found", user: voter, round: cfg.cfgGetRoundNumber()});
                 break;
             case 1: // first round, projects per BU
-                logic.getBuProjects(req.query.id, voter.bu, function (rr) 
+                logic.getBuProjects(req.query.id, voter.bu, function (rr)
                     {
                     res.json({result: "Found", user: voter, projects: rr, round: cfg.cfgGetRoundNumber()});
                     });
