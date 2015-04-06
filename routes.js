@@ -1,5 +1,5 @@
 var express = require('express');
-var logic   = require('./logic');
+var logic   = require('./logicmdb');
 var cfg     = require('./configmgr');
 
 REST_Votes = function (req, res)
@@ -36,7 +36,7 @@ REST_Voters = function (req, res) {
     {
         console.log("|rest| voters result=%j err=%j ", voter, err);
 
-        if (!err) {
+        if (err != null) {
             console.warn("|rest| voters %j not found", req.query.id);
             res.json({result: "Not Found"});
             return;
