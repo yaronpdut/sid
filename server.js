@@ -8,7 +8,7 @@ var rest_routes     = require('./routes');
 
 // open database files
 
-cfg.cfgOpenDb();
+// cfg.cfgOpenDb();
 
 var theApplication = function() {
 

@@ -1,7 +1,3 @@
-/**
- * Created by yaronpd on 05/04/2015.
- */
-
 var MongoClient = require('mongodb').MongoClient;
 var MongoServerUrl;
 
@@ -13,58 +9,58 @@ else {
     MongoServerUrl = 'mongodb://admin:NHigCk3xNWdf@127.9.4.2:27017/nsdv';
 }
 
-
 var ConnectAndExec = function (callback) {
     MongoClient.connect(MongoServerUrl, function (err, db) {
         callback(db);
     });
 };
 
-var doFindOne = function(collectionName, Query, Callback)
-{
+var doFindOne = function (collectionName, Query, Callback) {
     ConnectAndExec(function (db) {
         var collection = db.collection(collectionName);
-
-        collection.findOne(Query, Callback);
-    });
-};
-
-var doFind = function(collectionName, Query, Callback)
-{
-    ConnectAndExec(function (db) {
-        var collection = db.collection(collectionName);
-        collection.findOne(Query, Callback);
-        collection.find(Query).toArray(Callback);
-    });
-};
-
-
-var findVoter = function (theUserName, callback)
-{
-    doFindOne("voters", {userName: theUserName}, function (err, item) {
-            console.log("|log| looking for voter %s found=%j docs=%j", theUserName, err, item);
-            callback(err, item);
+        collection.findOne(Query, function (err, item) {
+            Callback(err, item);
+            db.close();
         });
+    });
+};
+
+var doFind = function (collectionName, Query, Callback) {
+    ConnectAndExec(function (db) {
+        var collection = db.collection(collectionName);
+        collection.find(Query).toArray(
+            function (err, docs) {
+                Callback(err, docs);
+                db.close();
+            });
+    });
+};
+
+
+var findVoter = function (theUserName, callback) {
+    doFindOne("voters", {userName: theUserName}, function (err, item) {
+        console.log("|log| looking for voter %s found=%j docs=%j", theUserName, err, item);
+        callback(err, item);
+    });
 
 };
 
 var getProjectMembers = function (proj_code, callback) {
     doFind("voters", {project: proj_code}, function (err, docs) {
-            if (docs) {
-                callback(true, docs);
-            }
-            else {
-                callback(false);
-            }
-        });
+        if (docs) {
+            callback(true, docs);
+        }
+        else {
+            callback(false);
+        }
+    });
 };
 
-var getProjectDetails = function (proj_code, callback)
-{
+var getProjectDetails = function (proj_code, callback) {
     doFindOne("projects", {project_code: proj_code}, function (err, item) {
-            console.log("|log| looking for project %s found=%j record=%j", proj_code, err, item);
-            callback(item);
-        });
+        console.log("|log| looking for project %s found=%j record=%j", proj_code, err, item);
+        callback(item);
+    });
 };
 
 
@@ -79,21 +75,19 @@ var getBuProjects = function (userid, bunit, callback) {
         // limit the projects
 
         doFind("projects", {$and: [{bu: bunit}, {project_code: {$ne: user_rec.project}}]}, function (err, docs) {
-                callback(err, docs);
-            });
-
-        });
-};
-
-var getProjects = function (exclude_prj_code, callback)
-{
-    doFind("projects", {project_code: {$ne: exclude_prj_code}}, function (err, docs) {
             callback(err, docs);
         });
+
+    });
 };
 
-var getVotes = function (callback, bunit)
-{
+var getProjects = function (exclude_prj_code, callback) {
+    doFind("projects", {project_code: {$ne: exclude_prj_code}}, function (err, docs) {
+        callback(err, docs);
+    });
+};
+
+var getVotes = function (callback, bunit) {
 
     var findString =
         bunit == undefined ? {}
@@ -124,8 +118,7 @@ var dbGetUserRecord = function (username, callback) {
 
 };
 
-var updateUserRecWithVote = function (user, voted_project, callback)
-{
+var updateUserRecWithVote = function (user, voted_project, callback) {
     console.log(JSON.stringify(user));
     ConnectAndExec(function (db) {
         var collection = db.collection('voters');
@@ -146,8 +139,7 @@ var dbCheckIfUserCanVote4Project = function (user, project, callback) {
     // get project record
 
     switch (cfg.cfgGetRoundNumber()) {
-        case 1 :
-            // user cannot vote to its own project
+        case 1 : // user cannot vote to its own project
             if (user.project != null && user.project == project) {
                 console.log("|logic| Error: User can not vote to a project associated with");
                 callback(true, {reason: "Error: User can not vote to a project associated with"});
@@ -155,7 +147,7 @@ var dbCheckIfUserCanVote4Project = function (user, project, callback) {
             }
 
             // find the project
-            doFind('projects',{"project_code": project}, function (err, docs) {
+            doFind('projects', {"project_code": project}, function (err, docs) {
                 if (docs.length == 0) {
                     console.log("|logic| Error: Invalid Project Id");
                     callback(true, {reason: "Error: Invalid Project Id. Project code not found"});
@@ -178,8 +170,7 @@ var dbCheckIfUserCanVote4Project = function (user, project, callback) {
                 }
             });
             break;
-        case 2:
-            // find the project in final projects
+        case 2: // find the project in final projects
             doFind('finals', {"project_code": project}, function (err, docs) {
                 if (docs.length == 0) {
                     console.log("|logic| Error: Invalid Project Id");
@@ -225,22 +216,21 @@ var doVote = function (username, token, project, callback) {
 
 };
 
-var dbGetFinalProjectToVote = function (callback)
-{
+var dbGetFinalProjectToVote = function (callback) {
     doFind('finals', {}, function (err, docs) {
         callback(docs);
     });
 };
 
 /*
-findVoter("Yaron Pdut", function (err, item) {
-    console.dir(item);
-});
+ findVoter("Yaron Pdut", function (err, item) {
+ console.dir(item);
+ });
 
-getProjectMembers("1", function (err, item) {
-    console.dir(item);
-});
-*/
+ getProjectMembers("1", function (err, item) {
+ console.dir(item);
+ });
+ */
 
 module.exports.findVoter = findVoter;
 module.exports.getProjectMembers = getProjectMembers;

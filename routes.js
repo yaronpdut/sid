@@ -47,7 +47,8 @@ REST_Voters = function (req, res) {
             case 0: // no voting yet, so not project to vote for.
                 res.json({result: "Found", user: voter, round: cfg.cfgGetRoundNumber()});
                 break;
-            case 1: // first round, projects per BU
+            case 1:// first round, projects per BU
+                console.log(voter);
                 logic.getBuProjects(req.query.id, voter.bu, function (rr)
                     {
                     res.json({result: "Found", user: voter, projects: rr, round: cfg.cfgGetRoundNumber()});
