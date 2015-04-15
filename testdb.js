@@ -1,35 +1,20 @@
-// JavaScript source code
+var MongoClient = require('mongodb').MongoClient;
 
-var bunyan = require('bunyan');
-var log = bunyan.createLogger(
-	{ 
-	name: "SID REST" 
-	}
-   );
+var MongoServerUrl = 'mongodb://:localhost/test';
 
-log.info("hi");
+MongoClient.connect(MongoServerUrl, function (err, db)
+{
+    var collection = db.collection('voters');
 
+    collection.aggregate(
+        [
+            { $sort : { voted: 1} },
+            { $group: {
+                _id : "$voted",
+                count: { $sum: 1 } } }
+        ],
+        function (err, result) {
+            console.log(JSON.stringify(result));
+        });
 
-var Datastore = require('nedb'), // https://github.com/louischatriot/nedb
-    db = new Datastore(
-        {
-            filename: 'projects.json',
-            autoload: true
-        }
-    );
-
-
-var bunit = "mcr";
-var exclude_prj_code = "1";
-
-
-db.findOne({ $and: [{ bu: bunit }, { project_code: { $ne: exclude_prj_code } }] },
-    function (err, docs)
-    {
-        log.info("err=%j record=%j", err == undefined ? "no" : "yes", docs);
-    }
-    );
-
-
-
-
+});

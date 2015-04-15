@@ -1,0 +1,13 @@
+    {
+      // Customer module configs
+      "Voting": {
+        "Round1": {
+          "Start": "Wed Apr 15 2015 16:24:50 GMT+0300",
+          "End": "Wed Apr 15 2015 19:24:50 GMT+0300"
+        },
+        "Round2": {
+          "Start": "Wed Apr 15 2015 16:24:50 GMT+0300",
+          "End": "Wed Apr 15 2015 16:24:50 GMT+0300"
+        }
+      }
+    }

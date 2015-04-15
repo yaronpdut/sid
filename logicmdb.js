@@ -1,5 +1,6 @@
 var MongoClient = require('mongodb').MongoClient;
 var MongoServerUrl;
+var cfg     = require('./configmgr');
 
 // check operating environment for MongoDB connection string
 if (process.env.OPENSHIFT_NODEJS_IP === undefined) {
@@ -63,6 +64,11 @@ var getProjectDetails = function (proj_code, callback) {
     });
 };
 
+var dbGetProjects = function (callback) {
+    doFind("projects", {}, function (err, item) {
+        callback(item);
+    });
+};
 
 /**
  * return list of projects user can vote, from its bu, excluding the project he assign to.
@@ -79,6 +85,13 @@ var getBuProjects = function (userid, bunit, callback) {
         });
 
     });
+};
+
+var getBuProjectsEx = function (excludeprj, bunit, callback) {
+    // get user record
+        doFind("projects", {$and: [{bu: bunit}, {project_code: {$ne: excludeprj}}]}, function (err, docs) {
+            callback(err, docs);
+        });
 };
 
 var getProjects = function (exclude_prj_code, callback) {
@@ -222,23 +235,62 @@ var dbGetFinalProjectToVote = function (callback) {
     });
 };
 
-/*
- findVoter("Yaron Pdut", function (err, item) {
- console.dir(item);
- });
+var dbResetVotes = function (callback) {
+    ConnectAndExec(function (db)
+    {
+        var collection = db.collection('voters');
 
- getProjectMembers("1", function (err, item) {
- console.dir(item);
- });
- */
+        // db.voters.update({}, {$set: {voted: ""} },{upsert: true, multi: true})
+
+        collection.update(
+            {},
+            {$set: {voted: ""} },
+            {upsert: true, multi: true},
+            function (err, numReplaced) {
+                if (err) console.log("UPDATE: " + err);
+                else console.log("UPDATE numReplaced: " + numReplaced);
+                callback(err)
+            });
+    });
+};
+
+dbGetVotesResults = function(callback){
+
+    ConnectAndExec(function (db)
+    {
+        var collection = db.collection('voters');
+
+        collection.aggregate(
+            [
+                { $sort : { voted: 1} },
+                { $group: {
+                    _id : "$voted",
+                    count: { $sum: 1 } } }
+            ],
+            function (err, result) {
+                if (err)
+                    console.log("VOTES SUMMARY: " + err);
+                else
+                    console.log("VOTES SUMMARY:" + JSON.stringify(result));
+
+                callback(result)
+            });
+    });
+
+
+}
 
 module.exports.findVoter = findVoter;
 module.exports.getProjectMembers = getProjectMembers;
 module.exports.getProjectDetails = getProjectDetails;
 module.exports.getBuProjects = getBuProjects;
+module.exports.getBuProjectsEx = getBuProjectsEx;
 module.exports.getProjects = getProjects;
 module.exports.getVotes = getVotes;
 module.exports.dbGetUserRecord = dbGetUserRecord;
 module.exports.dbCheckIfUserCanVote4Project = dbCheckIfUserCanVote4Project;
 module.exports.doVote = doVote;
 module.exports.dbGetFinalProjectToVote = dbGetFinalProjectToVote;
+module.exports.dbResetVotes = dbResetVotes;
+module.exports.dbGetVotesResults = dbGetVotesResults;
+module.exports.dbGetProjects = dbGetProjects;

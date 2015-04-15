@@ -1,10 +1,17 @@
 var express = require('express');
 var logic   = require('./logicmdb');
 var cfg     = require('./configmgr');
+var config = require('config');
 
 REST_Votes = function (req, res)
 {
-    var arrDistribution = []; // summed results
+
+    console.log('|rest| votes API request ')
+    logic.dbGetVotesResults(function (lstVoters) {
+        res.json(lstVoters);
+    });
+
+ /*   var arrDistribution = []; // summed results
 
     console.log('|rest| votes API request ')
     logic.getVotes(function (lstVoters) {
@@ -18,6 +25,7 @@ REST_Votes = function (req, res)
 
         res.json({votes: arrDistribution });
     }, req.query.bu);
+*/
 }
 
 REST_Voters = function (req, res) {
@@ -49,7 +57,7 @@ REST_Voters = function (req, res) {
                 break;
             case 1:// first round, projects per BU
                 console.log(voter);
-                logic.getBuProjects(req.query.id, voter.bu, function (rr)
+                logic.getBuProjectsEx(voter.project, voter.bu, function (err, rr)
                     {
                     res.json({result: "Found", user: voter, projects: rr, round: cfg.cfgGetRoundNumber()});
                     });
@@ -109,10 +117,84 @@ REST_Project = function(req, res)
     });
 }
 
+REST_Projects = function(req, res)
+{
+    console.log("|rest| project API request project id=%s ", req.query.id);
+
+    logic.dbGetProjects(function(projects) {
+            res.json(projects);
+    });
+}
+
+
+REST_ResetVotes = function(req, res)
+{
+    logic.dbResetVotes(function(err) {
+        res.json({ result: "Reset Votes : "+ err == null ? "no error" : JSON.stringify(err)});
+
+    })
+};
+
+var rest_routes_REST_stat = function(req, res)
+{
+    var voting = config.get('Voting');
+
+    rres = {
+        Round1: {Start: voting.Round1.Start, End: voting.Round1.End},
+        Round2: {Start: voting.Round2.Start, End: voting.Round2.End}
+    }
+
+    res.json(rres);
+};
+
+
 
 module.exports.REST_Votes   = REST_Votes;
 module.exports.REST_Voters  = REST_Voters;
 module.exports.REST_Vote    = REST_Vote;
 module.exports.REST_Project = REST_Project;
+module.exports.REST_ResetVotes = REST_ResetVotes;
+module.exports.rest_routes_REST_stat = rest_routes_REST_stat;
+module.exports.REST_Projects = REST_Projects;
 
 
+/*
+
+group by BU:
+
+ db.voters.aggregate(
+ [
+ { $sort : { bu: 1} },
+ { $group: {
+ _id : "$bu",
+ count: { $sum: 1 } } }
+ ]
+ )
+
+
+ db.voters.aggregate(
+ [
+ { $sort : { bu: 1} },
+ { $group:
+ {
+ _id : {bu: "$bu", site: "$site" },
+ count: { $sum: 1 }
+ }
+ }
+ ]
+ )
+
+
+ db.voters.aggregate(
+ [
+ { $sort : { voted: 1} },
+ { $group: {
+ _id : "$voted",
+ count: { $sum: 1 } } }
+ ]
+ )
+
+ db.getCollection('voters').find( {voted : { $ne :"" }})
+
+
+ */
