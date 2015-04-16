@@ -44,7 +44,7 @@ REST_Voters = function (req, res) {
     {
         console.log("|rest| voters result=%j err=%j ", voter, err);
 
-        if (err != null) {
+        if (voter == null) {
             console.warn("|rest| voters %j not found", req.query.id);
             res.json({result: "Not Found"});
             return;

@@ -37,6 +37,10 @@ function handleFile(err, data)
             ,project    :   ""
             ,voted      :   ""
             ,final_vote :   ""
+	    ,location   :   obj[index].Location	
+	    ,email      :   obj[index].email
+	    ,country    :   obj[index].Country		
+	    
             };
 
         db.insert(record, function (err, newDoc) {   // Callback is optional

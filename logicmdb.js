@@ -41,7 +41,13 @@ var doFind = function (collectionName, Query, Callback) {
 var findVoter = function (theUserName, callback) {
     doFindOne("voters", {userName: theUserName}, function (err, item) {
         console.log("|log| looking for voter %s found=%j docs=%j", theUserName, err, item);
-        callback(err, item);
+        if(item)
+            callback(err, item);
+        else {
+            doFindOne("voters", {email: theUserName}, function (err, item) {
+                callback(err, item);
+            });
+        }
     });
 
 };
