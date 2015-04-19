@@ -156,7 +156,12 @@ var REST_stat = function(req, res)
         Round2: {Start: voting.Round2.Start, End: voting.Round2.End}
     }
 
-    res.json(rres);
+    logic.dbNumberOfVoters(function(ares)
+    {
+        rres.db_stat = ares;
+        res.json(rres);
+
+    });
 };
 
 

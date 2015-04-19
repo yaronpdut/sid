@@ -359,7 +359,27 @@ dbGetVotesResults = function(callback){
     });
 }
 
+dbNumberOfVoters = function(callback)
+{
+    var result = {  };
 
+    ConnectAndExec(function (db)
+    {
+        var collection = db.collection('voters');
+        collection.find({}).
+            toArray(function (err, docs) {
+                result.numberOfVoters = docs.length;
+                collection.find({voted: {$ne: ""}}).toArray(
+                    function (err, docs) {
+                        result.voted = docs.length;
+                        callback(result);
+                        db.close();
+                    });
+
+            });
+
+    });
+}
 
 module.exports.findVoter = findVoter;
 module.exports.getProjectMembers = getProjectMembers;
@@ -376,3 +396,4 @@ module.exports.dbResetVotes = dbResetVotes;
 module.exports.dbGetVotesResults = dbGetVotesResults;
 module.exports.dbGetProjects = dbGetProjects;
 module.exports.dbGetAllProjects = dbGetAllProjects;
+module.exports.dbNumberOfVoters = dbNumberOfVoters;
