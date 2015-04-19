@@ -7,7 +7,7 @@
 var projectsDataSource = new kendo.data.DataSource({
 }),
 
-server = "http://localhost:8080/",
+server = "http://nsdv-sidv.rhcloud.com//",
 
 kendoMobileApp,
 

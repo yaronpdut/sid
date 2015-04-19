@@ -10,6 +10,9 @@ else {
     MongoServerUrl = 'mongodb://admin:NHigCk3xNWdf@127.9.4.2:27017/nsdv';
 }
 
+console.log(cfg.getTimeStamp()," MongoDB |info| Database Path = ", MongoServerUrl);
+
+
 var ConnectAndExec = function (callback) {
     MongoClient.connect(MongoServerUrl, function (err, db) {
         callback(db);
@@ -39,12 +42,17 @@ var doFind = function (collectionName, Query, Callback) {
 
 
 var findVoter = function (theUserName, callback) {
-    doFindOne("voters", {userName: theUserName}, function (err, item) {
-        console.log("|log| looking for voter %s found=%j docs=%j", theUserName, err, item);
+
+    var query = { userName: new RegExp(theUserName, "i") };
+    doFindOne("voters", query, function (err, item) {
+        console.log(cfg.getTimeStamp()," findVoter |info| "
+            ,"looking for voter ", theUserName);
+
         if(item)
             callback(err, item);
         else {
-            doFindOne("voters", {email: theUserName}, function (err, item) {
+            query = { email: new RegExp(theUserName, "i") };
+            doFindOne("voters", query, function (err, item) {
                 callback(err, item);
             });
         }
@@ -65,16 +73,40 @@ var getProjectMembers = function (proj_code, callback) {
 
 var getProjectDetails = function (proj_code, callback) {
     doFindOne("projects", {project_code: proj_code}, function (err, item) {
-        console.log("|log| looking for project %s found=%j record=%j", proj_code, err, item);
+        console.log(cfg.getTimeStamp()," findVoter |info| ",
+            "looking for project", proj_code, " found=", err, "record=",  item);
         callback(item);
     });
 };
 
-var dbGetProjects = function (callback) {
+var dbGetAllProjects = function (callback) {
     doFind("projects", {}, function (err, item) {
         callback(item);
     });
 };
+
+
+var dbGetProjects = function (userid, filterName, value, callback) {
+    // get user record
+    findVoter(userid, function (err, user_rec) {
+        // limit the projects
+
+        switch(filterName) {
+            case "name"     :
+                doFind("projects", { project_code: value }, {}, function (err, docs) {
+                    callback(err, docs);
+                });
+                break;
+            case "bu"       :
+                doFind("projects", { bu : value }, {}, function (err, docs) {
+                    callback(err, docs);
+                });
+                break;
+        }
+
+    });
+};
+
 
 /**
  * return list of projects user can vote, from its bu, excluding the project he assign to.
@@ -95,9 +127,19 @@ var getBuProjects = function (userid, bunit, callback) {
 
 var getBuProjectsEx = function (excludeprj, bunit, callback) {
     // get user record
+    if(bunit == "ALL")
+    {
+        doFind("projects", { project_code: { $ne: excludeprj}},
+            function (err, docs) {
+                callback(err, docs);
+            });
+
+    }
+    else {
         doFind("projects", {$and: [{bu: bunit}, {project_code: {$ne: excludeprj}}]}, function (err, docs) {
             callback(err, docs);
         });
+    }
 };
 
 var getProjects = function (exclude_prj_code, callback) {
@@ -116,14 +158,14 @@ var getVotes = function (callback, bunit) {
         var results = [];
         for (var i = 0, len = docs.length; i < len; i++) {
             if (docs[i].voted != undefined && docs[i].voted != "") {
-                console.log(docs[i].voted);
+                // console.log(docs[i].voted);
                 if (results[docs[i].voted] == undefined)
                     results[docs[i].voted] = 1;
                 else
                     results[docs[i].voted] += 1;
             }
         }
-        console.log(results);
+        console.log(cfg.getTimeStamp()," getVotes |info| ",results);
         callback(results);
 
     });
@@ -138,7 +180,8 @@ var dbGetUserRecord = function (username, callback) {
 };
 
 var updateUserRecWithVote = function (user, voted_project, callback) {
-    console.log(JSON.stringify(user));
+    console.log(cfg.getTimeStamp()," updateUserRecWithVote |info| updating vote record for ",user);
+
     ConnectAndExec(function (db) {
         var collection = db.collection('voters');
 
@@ -147,8 +190,11 @@ var updateUserRecWithVote = function (user, voted_project, callback) {
             {$set: {voted: voted_project}},
             {},
             function (err, numReplaced) {
-                if (err) console.log("UPDATE: " + err);
-                else console.log("UPDATE numReplaced: " + numReplaced);
+                if (err)
+                    console.error(cfg.getTimeStamp()," updateUserRecWithVote |error| ",err);
+
+                else
+                    console.error(cfg.getTimeStamp()," updateUserRecWithVote |info| numReplaced:",numReplaced);
                 callback(err)
             });
     });
@@ -160,7 +206,7 @@ var dbCheckIfUserCanVote4Project = function (user, project, callback) {
     switch (cfg.cfgGetRoundNumber()) {
         case 1 : // user cannot vote to its own project
             if (user.project != null && user.project == project) {
-                console.log("|logic| Error: User can not vote to a project associated with");
+                console.error(cfg.getTimeStamp()," dbCheckIfUserCanVote4Project |error| User can not vote to a project associated with ",user);
                 callback(true, {reason: "Error: User can not vote to a project associated with"});
                 return;
             }
@@ -168,23 +214,22 @@ var dbCheckIfUserCanVote4Project = function (user, project, callback) {
             // find the project
             doFind('projects', {"project_code": project}, function (err, docs) {
                 if (docs.length == 0) {
-                    console.log("|logic| Error: Invalid Project Id");
+                    console.error(cfg.getTimeStamp()," dbCheckIfUserCanVote4Project |error| Invalid Project Id ", project);
                     callback(true, {reason: "Error: Invalid Project Id. Project code not found"});
                     return;
                 }
 
                 if (user.voted != '') {
-                    console.log("|logic| Error: User already voted");
+                    console.error(cfg.getTimeStamp()," dbCheckIfUserCanVote4Project |error| User already voted ", user);
                     callback(true, {reason: "Error: User already voted"});
 
                 }
                 // verify user and project are from the same BU
-                if (user.bu != docs[0].bu) {
-                    console.log("|logic| Error: User cannot vote to a project not in its own BU");
+                if (user.bu != "ALL" && user.bu != docs[0].bu) {
+                    console.error(cfg.getTimeStamp()," dbCheckIfUserCanVote4Project |error| User cannot vote to a project not in its own BU ", user);
                     callback(true, {reason: "Error: User cannot vote to a project not in its own BU"});
                 }
                 else {
-                    console.log(false);
                     callback(false);
                 }
             });
@@ -192,7 +237,7 @@ var dbCheckIfUserCanVote4Project = function (user, project, callback) {
         case 2: // find the project in final projects
             doFind('finals', {"project_code": project}, function (err, docs) {
                 if (docs.length == 0) {
-                    console.log("|logic| Error: Invalid Project Id");
+                    console.error(cfg.getTimeStamp()," dbCheckIfUserCanVote4Project |error| Invalid Project Id ", project);
                     callback(true, {reason: "Error: Invalid Project Id. Project code not found"});
                 }
             });
@@ -201,21 +246,18 @@ var dbCheckIfUserCanVote4Project = function (user, project, callback) {
 };
 
 var doVote = function (username, token, project, callback) {
-    console.log("|logic| do vote: %s %s %s ", username, token, project);
-
+    console.log(cfg.getTimeStamp()," doVote |info| ", username, token, project);
     // retrieve user record first
     dbGetUserRecord(username, function (user) {
         if (!user || user.emp_number != token) {
-            console.log("|logic| Invalid user name or token");
+            console.error(cfg.getTimeStamp()," doVote |error| Invalid user name or token", username, token, project);
             callback('{ result: "Error: Invalid user name or token" }');
             return;
         }
 
         dbCheckIfUserCanVote4Project(user, project, function (err, reason) {
             if (err == false) {
-                console.log("updateUserRecWithVote");
                 updateUserRecWithVote(user, project, function (err) {
-                    console.log(err);
                     callback('{ result: "OK" }');
                 })
 
@@ -246,19 +288,48 @@ var dbResetVotes = function (callback) {
     {
         var collection = db.collection('voters');
 
-        // db.voters.update({}, {$set: {voted: ""} },{upsert: true, multi: true})
-
         collection.update(
             {},
             {$set: {voted: ""} },
             {upsert: true, multi: true},
             function (err, numReplaced) {
-                if (err) console.log("UPDATE: " + err);
-                else console.log("UPDATE numReplaced: " + numReplaced);
+                if (err) {
+                    console.log(cfg.getTimeStamp()," dbResetVotes |error| ");
+                }
+                else {
+                    console.log(cfg.getTimeStamp()," dbResetVotes |info| Number of updated records= ", numReplaced.n);
+                }
                 callback(err)
             });
     });
 };
+
+var dbAddProjectdetails2Votes = function(results, callback)
+{
+    var i = 0;
+    (function insertOne() {
+
+// *******************************************
+
+        doFindOne("projects", {project_code: results[i]._id}, function (err, doc) {
+            if (i < results.length-1) {
+                // console.log(i, results.length, doc);
+                results[i].project = doc;
+                i++;
+                insertOne();
+            }
+            else {
+                callback(results);
+                return;
+            }
+
+        });
+
+// *******************************************
+
+
+    })();
+}
 
 dbGetVotesResults = function(callback){
 
@@ -275,16 +346,20 @@ dbGetVotesResults = function(callback){
             ],
             function (err, result) {
                 if (err)
-                    console.log("VOTES SUMMARY: " + err);
-                else
-                    console.log("VOTES SUMMARY:" + JSON.stringify(result));
+                    console.log(cfg.getTimeStamp()," dbGetVotesResults |info| VOTES SUMMARY: ",  err);
+                else {
+                    console.log(cfg.getTimeStamp(), " dbGetVotesResults |info| VOTES SUMMARY: ", JSON.stringify(result));
+                }
 
-                callback(result)
+                dbAddProjectdetails2Votes(result, function(results){
+                    callback(result)
+                });
+
             });
     });
-
-
 }
+
+
 
 module.exports.findVoter = findVoter;
 module.exports.getProjectMembers = getProjectMembers;
@@ -300,3 +375,4 @@ module.exports.dbGetFinalProjectToVote = dbGetFinalProjectToVote;
 module.exports.dbResetVotes = dbResetVotes;
 module.exports.dbGetVotesResults = dbGetVotesResults;
 module.exports.dbGetProjects = dbGetProjects;
+module.exports.dbGetAllProjects = dbGetAllProjects;

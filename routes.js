@@ -5,36 +5,28 @@ var config = require('config');
 
 REST_Votes = function (req, res)
 {
-
-    console.log('|rest| votes API request ')
+    console.log(cfg.getTimeStamp(),  'REST_Votes |info|')
     logic.dbGetVotesResults(function (lstVoters) {
         res.json(lstVoters);
     });
 
- /*   var arrDistribution = []; // summed results
-
-    console.log('|rest| votes API request ')
-    logic.getVotes(function (lstVoters) {
-        lstVoters.forEach(function (currentValue, index, array) {
-            if (currentValue) {
-                arrDistribution.push({project: index, votes: currentValue});
-            }
-        });
-        console.dir();
-        console.log('|rest| votes API request response with %s elements in table', lstVoters.length.toString())
-
-        res.json({votes: arrDistribution });
-    }, req.query.bu);
-*/
 }
 
 REST_Voters = function (req, res) {
-    console.log("|rest| voters API request id=%s round=%s", req.query.id, cfg.cfgGetRoundNumber());
+    console.log(cfg.getTimeStamp()
+        , " REST_Voters |info|"
+        , "id=", req.query.id
+        , " round="
+        , cfg.cfgGetRoundNumber());
 
     // user id query field is mandatory
     if (!req.query.id)
     {
-        console.warn("|rest|warning| voters - user id is missing %s", req.query.id);
+        console.error(cfg.getTimeStamp()," REST_Voters |error|"
+            ," user id "
+            ,req.query.id
+            ," is missing");
+
         res.json({result: "Error: User ID query string parameter is mandatory"});
         return;
     }
@@ -42,10 +34,14 @@ REST_Voters = function (req, res) {
     // look for specific user in database
     logic.findVoter(req.query.id, function (err, voter)
     {
-        console.log("|rest| voters result=%j err=%j ", voter, err);
+        console.log(cfg.getTimeStamp()," REST_Voters |info|"
+                ," result=","\n", voter, "\n"
+                , "err=", err);
 
         if (voter == null) {
-            console.warn("|rest| voters %j not found", req.query.id);
+            console.warn(cfg.getTimeStamp(), " REST_Voters |warn|",
+                req.query.id, " not found");
+
             res.json({result: "Not Found"});
             return;
         }
@@ -56,7 +52,6 @@ REST_Voters = function (req, res) {
                 res.json({result: "Found", user: voter, round: cfg.cfgGetRoundNumber()});
                 break;
             case 1:// first round, projects per BU
-                console.log(voter);
                 logic.getBuProjectsEx(voter.project, voter.bu, function (err, rr)
                     {
                     res.json({result: "Found", user: voter, projects: rr, round: cfg.cfgGetRoundNumber()});
@@ -80,12 +75,20 @@ REST_Voters = function (req, res) {
  */
 REST_Vote = function (req, res)
 {
-    console.log("|rest| vote API request id=%s token=%s project=%s", req.query.id, req.query.token, req.query.project);
+
+    console.log(cfg.getTimeStamp()," REST_Vote |info|"
+        , "id=",      req.query.id
+        , "token=",   req.query.token
+        , "project=", req.query.project);
 
 // validate that query parameters do exist
     if (!req.query.id || !req.query.token || !req.query.project) {
-        res.json({result: "Error: Invalid query string parameters."});
-        console.warn("|rest| vote API Invalid query string parameters id=%s token=%s project=%s", req.query.id, req.query.token, req.query.project);
+        res.json({result: "Error: ++++++++++ Invalid query string parameters."});
+        console.error(cfg.getTimeStamp()," REST_Vote |error|"
+            , "Invalid query string parameters "
+            , "id=",      req.query.id
+            , "token=",   req.query.token
+            , "project=", req.query.project);
     }
     else {
         logic.doVote(req.query.id, req.query.token, req.query.project, function (cb) {
@@ -102,42 +105,51 @@ REST_Vote = function (req, res)
  */
 REST_Project = function(req, res)
 {
-    console.log("|rest| project API request project id=%s ", req.query.id);
+    console.log(cfg.getTimeStamp(),"REST_Project |info|", "project id=", req.query.id);
 
     if (!req.query.id) {
-        res.json({ result: "Error: Invalid query string parameters."});
-        console.warn("|rest| project API Invalid query string parameters id=%s", req.query.id);
+        res.json({result: "Error: Invalid query string parameters."});
+        console.error(cfg.getTimeStamp(), "REST_Project |error|",
+            " Invalid query string parameters project id=", req.query.id);
     }
+    else {
+        logic.getProjectDetails(req.query.id, function (project_record) {
+            logic.getProjectMembers(req.query.id, function (err, docs) {
+                res.json({project: project_record, members: docs});
 
-    logic.getProjectDetails(req.query.id, function(project_record) {
-        logic.getProjectMembers(req.query.id, function(err, docs) {
-            res.json( { project: project_record, members: docs });
-
+            });
         });
-    });
+    }
 }
 
 REST_Projects = function(req, res)
 {
-    console.log("|rest| project API request project id=%s ", req.query.id);
+    console.log(cfg.getTimeStamp()," REST_Projects |info|");
 
-    logic.dbGetProjects(function(projects) {
-            res.json(projects);
+    logic.dbGetAllProjects(function(projects) {
+            console.log(cfg.getTimeStamp()," REST_Projects |info| ", "number of projects=", projects.length);
+            res.json({
+                "number of projects" : projects.length
+                , "projects" : projects
+            });
     });
 }
 
 
 REST_ResetVotes = function(req, res)
 {
+    console.log(cfg.getTimeStamp()," REST_ResetVotes |info| ");
     logic.dbResetVotes(function(err) {
+        console.log(cfg.getTimeStamp()," REST_ResetVotes |info| done");
         res.json({ result: "Reset Votes : "+ err == null ? "no error" : JSON.stringify(err)});
 
     })
 };
 
-var rest_routes_REST_stat = function(req, res)
+var REST_stat = function(req, res)
 {
     var voting = config.get('Voting');
+    console.log(cfg.getTimeStamp()," REST_stat |info| ");
 
     rres = {
         Round1: {Start: voting.Round1.Start, End: voting.Round1.End},
@@ -154,7 +166,7 @@ module.exports.REST_Voters  = REST_Voters;
 module.exports.REST_Vote    = REST_Vote;
 module.exports.REST_Project = REST_Project;
 module.exports.REST_ResetVotes = REST_ResetVotes;
-module.exports.rest_routes_REST_stat = rest_routes_REST_stat;
+module.exports.REST_stat = REST_stat;
 module.exports.REST_Projects = REST_Projects;
 
 

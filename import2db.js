@@ -40,6 +40,11 @@ function handleFile(err, data)
 	    ,location   :   obj[index].Location	
 	    ,email      :   obj[index].email
 	    ,country    :   obj[index].Country		
+    	    ,supervisor :	obj[index].Supervisor
+            ,directorName :	obj[index].DirectorName
+            ,VP_name    :obj[index].VP_name
+            ,Top_VP_name : obj[index].Top_VP_name
+	    ,ELT_name : obj[index].ELT_name
 	    
             };
 

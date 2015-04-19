@@ -101,7 +101,7 @@ var theApplication = function() {
         self.routes['/project']    = rest_routes.REST_Project;
         self.routes['/projects']    = rest_routes.REST_Projects;
         self.routes['/resetv']    = rest_routes.REST_ResetVotes;
-        self.routes['/stat']      = rest_routes.rest_routes_REST_stat;
+        self.routes['/stat']      = rest_routes.REST_stat;
 
 
 
