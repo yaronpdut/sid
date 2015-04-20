@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script>
+
+
+    $(document).ready(function()
+    {
+        console.log("Hello");
+        var VotesTbl;
+
+        $.ajax({
+            url: 'votes',
+            type: 'GET',
+            success: function (response) {
+                var trHTML = '';
+                trHTML += '<tr><th>Code</th><th>Name</th><th># of Votes</th><th>Description</th></tr>';
+
+                $.each(response, function (i, item) {
+                    if (item._id != "") {
+                        trHTML += '<tr>'
+                        + '<td>' + item.project.project_code + '</td>'
+                        + '<td>'
+                                + '<a href="project?id=' + item.project.project_code + '">' + item.project.project_name + '</a>'
+                        + '</td>'
+                        + '<td>' + item.count + '</td>'
+                        + '<td>' + item.project.description + '</td>'
+                        + '</tr>';
+                    }
+                });
+                console.log(trHTML);
+                $('#records_table').append(trHTML);
+            }
+        });
+
+    });
+
+</script>
+
+<H2>Voting Summary</H2>
+
+<div >
+
+    <table id="records_table" border='0'>
+    </table>
+
+</div>
+</body>
+</html>

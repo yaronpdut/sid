@@ -128,10 +128,12 @@ REST_Projects = function(req, res)
 
     logic.dbGetAllProjects(function(projects) {
             console.log(cfg.getTimeStamp()," REST_Projects |info| ", "number of projects=", projects.length);
-            res.json({
+            res.json(projects);
+/*            res.json({
                 "number of projects" : projects.length
                 , "projects" : projects
-            });
+            });*/
+
     });
 }
 

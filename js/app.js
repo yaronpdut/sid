@@ -7,7 +7,8 @@
 var projectsDataSource = new kendo.data.DataSource({
 }),
 
-server = "http://nsdv-sidv.rhcloud.com//",
+//server = "http://nsdv-sidv.rhcloud.com//",
+server = "http://127.0.0.1:8080/",
 
 kendoMobileApp,
 
@@ -52,6 +53,7 @@ mainModel =  kendo.observable({
                         });
 
                         if(data.user.voted.length>0) {
+                            $("#thankYou").text("It seems like you already voted!")
                             kendoMobileApp.navigate('#voted-view', 'zoom');
                         } else {
                             kendoMobileApp.navigate('#projects-view', 'zoom');
@@ -81,7 +83,21 @@ mainModel =  kendo.observable({
                 },
                 url: server + "vote"
             }).done(function(data) {
+
                 this.voted = true;
+                if(typeof data.error !== "undefined")
+                {
+                    switch (data.error) {
+                        case 0: // OK
+                            $("#thankYou").text("Thank you for voting!!")
+                            break;
+                        case 3: // already voted
+                            $("#thankYou").text("Thank you for voting, but you already voted!")
+                            break;
+
+
+                    }
+                }
             });
         }
 

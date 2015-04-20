@@ -1,35 +1,123 @@
 <!DOCTYPE html>
+
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <title></title>
 </head>
+
 <body>
-<p style="text-align: justify;">
-    &nbsp;</p>
-<ul>
-    <li>
-        <a href="votes">Votes</a></li>
-    <li>
-        <a a href="projects"> Projects</a></li>
-    <li>        <a a href="stat"> Statistics</a></li>
-    </li>
-</ul>
-<div>
-    &nbsp;</div>
-<form action="voters">
-    <p>
-        Voter Record:</p>
-    <input name="id" type="" value="Yaron Pdut" /><input type="submit" />&nbsp;</form>
-<form action="project" name="project">
-    <p>
-        Project Record:</p>
-    <p>
-        <input name="id" type="text" /><input type="submit" /></p>
-</form>
-<form action="resetv">
-    Reset Votes:&nbsp;<input type="submit" />&nbsp;</form>
-<p>
-    &nbsp;</p>
-</body>
+
+<style>
+
+    .horizontal-nav {
+        background: #efefef;
+        border-radius: 6px;
+    }
+
+    .horizontal-nav ul {
+        background: #128F9A;
+        float: left;
+        text-align: center;
+        border-radius: 3px;
+        border: 1px solid #0e7079;
+    }
+
+    .horizontal-nav ul li {
+        float: left;
+        border-left: 1px solid #0e7079;
+    }
+
+    .horizontal-nav ul li:first-child {
+        border-left: 0 none;
+    }
+
+    .horizontal-nav ul li a {
+        display: block;
+        padding: 10px 20px;
+        color: #fff;
+        border-top: 1px solid rgba(255, 255, 255, 0.25);
+        border-left: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .horizontal-nav ul li:first-child a {
+        border-left: 0 none;
+    }
+
+    .horizontal-nav ul li a:hover {
+        background: #12808a;
+    }
+
+    .horizontal-nav ul li:first-child a {
+        border-top-left-radius: 3px;
+        border-bottom-left-radius: 3px;
+    }
+
+    .horizontal-nav ul li:last-child a {
+        border-top-right-radius: 3px;
+        border-bottom-right-radius: 3px;
+    }
+</style>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="js/jquery.horizontalNav.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        $('.nav-wrapper').horizontalNav();
+
+        $("#votingSummary").bind("click", function () {
+            $.get("votes.html", function (data) {
+                $('.internalV').html(data);
+            });
+        });
+
+        $("#projects").bind("click", function () {
+            $.get("projects.html", function (data) {
+                $('.internalV').html(data);
+            });
+        });
+
+        $("#voterrecord").bind("click", function () {
+            $.get("voter.html", function (data) {
+                $('.internalV').html(data);
+            });
+        });
+
+        $("#projrecord").bind("click", function () {
+            $.get("projectinfo.html", function (data) {
+                $('.internalV').html(data);
+            });
+        });
+
+
+        /*
+
+
+         <form action="resetv">
+         Reset Votes:&nbsp;<input type="submit"/>&nbsp;</form>
+         </body>
+
+         */
+    });
+</script>
+
+<h1> Ship It! Day Dashboard</h1>
+<nav class="horizontal-nav full-width horizontalNav-notprocessed nav-wrapper">
+    <ul>
+        <li><a href="#" id="votingSummary">Voting Summary</a></li>
+        <li><a href="#" id="projects"> Projects</a></li>
+        <li><a href="#" id="voterrecord"> Voter info</a></li>
+        <li><a href="#" id="projrecord"> Projects info</a></li>
+        <li><a href="#" id="stat"> Statistics</a></li>
+        <li><a href="#" id="resetv"> Reset Voting</a></li>
+    </ul>
+</nav>
+
+
+<div class="internalV">
+    <p></p>
+</div>
+
 </html>

@@ -207,7 +207,7 @@ var dbCheckIfUserCanVote4Project = function (user, project, callback) {
         case 1 : // user cannot vote to its own project
             if (user.project != null && user.project == project) {
                 console.error(cfg.getTimeStamp()," dbCheckIfUserCanVote4Project |error| User can not vote to a project associated with ",user);
-                callback(true, {reason: "Error: User can not vote to a project associated with"});
+                callback(true, {error: 1, reason: "Error: User can not vote to a project associated with"});
                 return;
             }
 
@@ -215,22 +215,25 @@ var dbCheckIfUserCanVote4Project = function (user, project, callback) {
             doFind('projects', {"project_code": project}, function (err, docs) {
                 if (docs.length == 0) {
                     console.error(cfg.getTimeStamp()," dbCheckIfUserCanVote4Project |error| Invalid Project Id ", project);
-                    callback(true, {reason: "Error: Invalid Project Id. Project code not found"});
+                    callback(true, {error: 2, reason: "Error: Invalid Project Id. Project code not found"});
                     return;
                 }
 
                 if (user.voted != '') {
-                    console.error(cfg.getTimeStamp()," dbCheckIfUserCanVote4Project |error| User already voted ", user);
-                    callback(true, {reason: "Error: User already voted"});
+                    console.error(cfg.getTimeStamp()," dbCheckIfUserCanVote4Project |error| User already voted ", user.UserName);
+                    callback(true, {error: 3, reason: "Error: User already voted"});
+                    return;
 
                 }
                 // verify user and project are from the same BU
                 if (user.bu != "ALL" && user.bu != docs[0].bu) {
                     console.error(cfg.getTimeStamp()," dbCheckIfUserCanVote4Project |error| User cannot vote to a project not in its own BU ", user);
-                    callback(true, {reason: "Error: User cannot vote to a project not in its own BU"});
+                    callback(true, {error: 4, reason: "Error: User cannot vote to a project not in its own BU"});
+                    return;
                 }
                 else {
                     callback(false);
+                    return;
                 }
             });
             break;
@@ -238,7 +241,8 @@ var dbCheckIfUserCanVote4Project = function (user, project, callback) {
             doFind('finals', {"project_code": project}, function (err, docs) {
                 if (docs.length == 0) {
                     console.error(cfg.getTimeStamp()," dbCheckIfUserCanVote4Project |error| Invalid Project Id ", project);
-                    callback(true, {reason: "Error: Invalid Project Id. Project code not found"});
+                    callback(true, {error: 5, reason: "Error: Invalid Project Id. Project code not found"});
+                    return;
                 }
             });
             break;
@@ -251,14 +255,14 @@ var doVote = function (username, token, project, callback) {
     dbGetUserRecord(username, function (user) {
         if (!user || user.emp_number != token) {
             console.error(cfg.getTimeStamp()," doVote |error| Invalid user name or token", username, token, project);
-            callback('{ result: "Error: Invalid user name or token" }');
+            callback({ error: 6, result: "Error: Invalid user name or token" });
             return;
         }
 
         dbCheckIfUserCanVote4Project(user, project, function (err, reason) {
             if (err == false) {
                 updateUserRecWithVote(user, project, function (err) {
-                    callback('{ result: "OK" }');
+                    callback({ error: 0, result: "OK" });
                 })
 
             }
