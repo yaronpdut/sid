@@ -5,7 +5,7 @@ var config = require('config');
 
 REST_Votes = function (req, res)
 {
-    console.log(cfg.getTimeStamp(),  'REST_Votes |info|')
+    console.log(cfg.getLogHeader('REST', 'INFO'),  'REST_Votes')
     logic.dbGetVotesResults(function (lstVoters) {
         res.json(lstVoters);
     });
@@ -13,8 +13,8 @@ REST_Votes = function (req, res)
 }
 
 REST_Voters = function (req, res) {
-    console.log(cfg.getTimeStamp()
-        , " REST_Voters |info|"
+
+    console.log(cfg.getLogHeader('REST', 'INFO')
         , "id=", req.query.id
         , " round="
         , cfg.cfgGetRoundNumber());
@@ -22,7 +22,7 @@ REST_Voters = function (req, res) {
     // user id query field is mandatory
     if (!req.query.id)
     {
-        console.error(cfg.getTimeStamp()," REST_Voters |error|"
+        console.error(cfg.getLogHeader('REST', 'ERROR')," REST_Voters"
             ," user id "
             ,req.query.id
             ," is missing");

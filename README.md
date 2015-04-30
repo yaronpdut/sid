@@ -73,6 +73,17 @@ parameters:
    ]
 }
 
+# vote return codes
+
+error: 0, reason: "OK"
+error: 1, reason: "Error: User can not vote to a project associated with"
+error: 2, reason: "Error: Invalid Project Id. Project code not found"
+error: 3, reason: "Error: User already voted"
+error: 4, reason: "Error: User cannot vote to a project not in its own BU"
+error: 5, reason: "Error: Invalid Project Id. Project code not found"
+error: 6, result: "Error: Invalid user name or token"
+
+
 # Installation
 
 When you set up a new environment, use `npm install`.
