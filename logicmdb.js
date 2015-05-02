@@ -288,53 +288,71 @@ var dbCheckIfUserCanVote4Project = function (user, project, callback) {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 
-var dbVerifyProjectListValid = function (user, projects, callback) {
-    // get project record
+var updateUserRecWithVoteEx = function (user, projects, callback) {
+    console.log(cfg.getTimeStamp()," updateUserRecWithVote updating vote record for ");
 
-    var projectsCount = 0;
-    (function findOne() {
+    ConnectAndExec(function (db) {
+        var collection = db.collection('voters');
 
-        doFind('finals', {"project_code": projects[i]}, function (err, docs) {
-            if (docs.length == 0) {
-                cfg.logError('LOGIC', "dbVerifyProjectListValid Invalid Project Id " + project);
-                callback(true, {error: 5, reason: "Error: Invalid Project Id. Project code not found"});
-                return;
-            }
-            else {
-                if (i == projects.length) {
-                    callback(false, {error: 0});
+        collection.updateOne(
+            user,
+            {$set: {rating: projects}},
+            {},
+            function (err, numReplaced) {
+                if (err) {
 
+                    cfg.logError('LOGIC', " updateUserRecWithVoteEx:  " + err);
                 }
-                i++;
-            }
+                else {
+                    cfg.logInfo('LOGIC', " updateUserRecWithVoteEx");
+                }
+                callback(err)
             });
-
     });
-
 };
 
 
-var doVoteEx = function (username, token, callback) {
-    console.log(cfg.getTimeStamp()," doVoteEx ", username, token, project);
-    // retrieve user record first
+var dbVerifyProjectListValid = function (user, projects, callback)
+{
+    var i;
 
-    var ListOProjects = [], i = 3;
-
-    for (i = 3; i < arguments.length(); i++)
+    for (i = 0; i < projects.length; i++)
     {
-        ListOProjects.push(arguments[i]);
+        (function(i) {
+            doFind('projects', {"project_code": projects[i]}, function (err, docs)
+            {
+                if (docs.length == 0) {
+                    cfg.logError('LOGIC', "dbVerifyProjectListValid Invalid Project Id " + projects[i]);
+                    callback(true, {error: 5, reason: "Error: Invalid Project Id. Project code not found"});
+                    return 0;
+                }
+                else {
+                    if (i == projects.length-1) {
+                        callback(false, {error: 0});
+
+                    }
+                }
+            });
+        })(i);
     }
+};
+
+
+var doVoteEx = function (username, token, projects, callback) {
+    cfg.logInfo("LOGIC","doVoteEx " + username + " " + token);
+
+    // retrieve user record first
 
     dbGetUserRecord(username, function (user) {
         if (!user || user.emp_number != token) {
-            cfg.logError('LOGIC', " doVote Invalid user name or token" + username + token + project);
+            cfg.logError('LOGIC', " doVote Invalid user name or token" + username + token);
             callback({ error: 6, result: "Error: Invalid user name or token" });
             return;
         }
 
-        dbVerifyProjectListValid(user, ListOProjects, function (err, reason) {
+        dbVerifyProjectListValid(user, projects, function (err, reason) {
             if (err == false) {
-                updateUserRecWithVote(user, project, function (err) {
+                updateUserRecWithVoteEx(user, projects, function (err) {
                     callback({ error: 0, result: "OK" });
                 })
 
@@ -503,7 +521,7 @@ module.exports.getProjects = getProjects;
 module.exports.getVotes = getVotes;
 module.exports.dbGetUserRecord = dbGetUserRecord;
 module.exports.dbCheckIfUserCanVote4Project = dbCheckIfUserCanVote4Project;
-module.exports.doVote = doVote;
+module.exports.doVoteEx = doVoteEx;
 module.exports.dbGetFinalProjectToVote = dbGetFinalProjectToVote;
 module.exports.dbResetVotes = dbResetVotes;
 module.exports.dbGetVotesResults = dbGetVotesResults;

@@ -73,7 +73,7 @@ REST_Voters = function (req, res) {
  * @param res
  * @constructor
  */
-REST_Vote = function (req, res)
+REST_VoteDepracted = function (req, res)
 {
 
     console.log(cfg.getTimeStamp()," REST_Vote |info|"
@@ -92,6 +92,44 @@ REST_Vote = function (req, res)
     }
     else {
         logic.doVote(req.query.id, req.query.token, req.query.project, function (cb) {
+            res.json(cb);
+        })
+    }
+}
+
+/**
+ * Perform the actual voting
+ * @param req
+ * @param res
+ * @constructor
+ */
+REST_Vote = function (req, res)
+{
+    cfg.logInfo('REST', "REST_Vote"
+        + " id=" +       req.query.id
+        + " token=" +   req.query.token
+    );
+
+    var ProjectsList = [];
+    var i = 1;
+
+    var currentProject = "project" + i;
+    while(req.query.hasOwnProperty(currentProject))
+    {
+        ProjectsList.push(req.query[currentProject]);
+        i++;
+        currentProject = "project" + i;
+    }
+
+// validate that query parameters do exist
+    if (!req.query.id || !req.query.token ) {
+        res.json({result: "Error: ++++++++++ Invalid query string parameters."});
+        cfg.logInfo('REST', " REST_Vote Invalid query string parameters "
+            + " id=" +req.query.id
+            + " token=" + req.query.token            );
+    }
+    else {
+        logic.doVoteEx(req.query.id, req.query.token, ProjectsList, function (cb) {
             res.json(cb);
         })
     }

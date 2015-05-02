@@ -134,6 +134,7 @@ var logError = function()
 
 module.exports.getLogHeader = getLogHeader;
 module.exports.logInfo = logInfo;
+module.exports.logError = logError;
 module.exports.cfgGetRoundNumber = cfgGetRoundNumber;
 module.exports.cfgGetDbRootDir = cfgGetDbRootDir;
 module.exports.cfgOpenDb = cfgOpenDb;
