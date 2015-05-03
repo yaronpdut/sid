@@ -93,15 +93,19 @@ var theApplication = function() {
      *  Create the routing table entries + handlers for the application.
      */
     self.createRoutes = function() {
+        self.postRoutes = [];
+        self.postRoutes ['/vote']    = rest_routes.REST_Vote;
+
+
         self.routes = { };
 
-        self.routes['/votes']   = rest_routes.REST_Votes;
-        self.routes['/voters']  = rest_routes.REST_Voters;
-        self.routes['/vote']    = rest_routes.REST_Vote;
-        self.routes['/project']    = rest_routes.REST_Project;
+        self.routes['/votes']       = rest_routes.REST_Votes;
+        self.routes['/voters']      = rest_routes.REST_Voters;
+        self.routes['/vote']        = rest_routes.REST_Vote;
+        self.routes['/project']     = rest_routes.REST_Project;
         self.routes['/projects']    = rest_routes.REST_Projects;
-        self.routes['/resetv']    = rest_routes.REST_ResetVotes;
-        self.routes['/stat']      = rest_routes.REST_stat;
+        self.routes['/resetv']      =   rest_routes.REST_ResetVotes;
+        self.routes['/stat']        = rest_routes.REST_stat;
 
 
 
@@ -131,9 +135,14 @@ var theApplication = function() {
         self.createRoutes();
         self.app = express(); // .createServer() deprecated;
 
-        //  Add handlers for the app (from the routes).
+        //  Add handlers for the app (from the routes). yaron
         for (var r in self.routes) {
             self.app.get(r, self.routes[r]);
+        }
+
+
+        for (var r in self.postRoutes) {
+            self.app.post(r, self.postRoutes[r]);
         }
     };
 

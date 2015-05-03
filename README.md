@@ -13,16 +13,68 @@ http://openshift.github.io/documentation/oo_cartridge_guide.html#nodejs
 
 # API
 
+## votes
+
+Method: `GET`
+Sample: `http://127.0.0.1:8080/votes`
+Mapped to: `REST_Votes`
+
+return list of vote summary in format of:
+
+[
+  {
+    "projectCode": "ppppp",
+    "value": nnnn,
+    "weightValue" nnnn: 
+  }
+]
+
+## voters
+
+Method: `GET`
+Sample: `http://127.0.0.1:8080/voters?id=Yaron Pdut`
+Mapped to: `REST_Votes`
+
+Return user details and list of project he can vote to.
+ 
+{
+  "result": "Found",
+  "user": {
+    ...
+    ...
+    ...
+    ...
+    "rating": [
+    ...
+    ...
+    ]
+  },
+  "projects": [
+    {
+      "_id": "usEhagjAx7T1fcuP",
+      "project_code": "2",
+    .....
+    .....
+    .....
+    }
+  ],
+  "NOM": 3
+} 
+
+NOM = maximum number of project user can vote to. 
+
 ## vote
+
+Method: POST
 
 Perform the actual vote.
 
 parameters:
 1. id
 2. token
-3. project
+3. project1..projectN
 
-http://127.0.0.1:8080/vote?id=nnn&token=tttt&project=ppp
+POST http://127.0.0.1:8080/vote?id=nnn&token=tttt&project1=ppp&project2=ppp
 
 results:
 
@@ -30,9 +82,6 @@ results:
 { result: "Error: invalid user name or token" }
 { result: "OK" }
 
-## voters
-
-## votes
 
 ## projects
 

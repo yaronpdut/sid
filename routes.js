@@ -3,41 +3,28 @@ var logic   = require('./logicmdb');
 var cfg     = require('./configmgr');
 var config = require('config');
 
-REST_Votes = function (req, res)
-{
-    console.log(cfg.getLogHeader('REST', 'INFO'),  'REST_Votes')
-    logic.dbGetVotesResults(function (lstVoters) {
-        res.json(lstVoters);
+// return list of summaries votes
+var REST_Votes = function (req, res) {
+    cfg.logInfo('REST', 'REST_Votes');
+    logic.dbGetVotesResults(function (VotingResultSet) {
+        res.json(VotingResultSet);
     });
+};
 
-}
+var REST_Voters = function (req, res) {
 
-REST_Voters = function (req, res) {
-
-    console.log(cfg.getLogHeader('REST', 'INFO')
-        , "id=", req.query.id
-        , " round="
-        , cfg.cfgGetRoundNumber());
+    cfg.logInfo('REST', "REST_Voters id=" + req.query.id);
 
     // user id query field is mandatory
-    if (!req.query.id)
-    {
-        console.error(cfg.getLogHeader('REST', 'ERROR')," REST_Voters"
-            ," user id "
-            ,req.query.id
-            ," is missing");
-
+    if (!req.query.id) {
+        cfg.logError('REST', "REST_Voters user id " + req.query.id + " is missing");
         res.json({result: "Error: User ID query string parameter is mandatory"});
         return;
     }
 
     // look for specific user in database
-    logic.findVoter(req.query.id, function (err, voter)
-    {
-        console.log(cfg.getTimeStamp()," REST_Voters |info|"
-                ," result=","\n", voter, "\n"
-                , "err=", err);
-
+    logic.findVoter(req.query.id, function (err, voter) {
+        cfg.logInfo("REST", "REST_Voters result=" + JSON.stringify(voter) + " err=" + err);
         if (voter == null) {
             console.warn(cfg.getTimeStamp(), " REST_Voters |warn|",
                 req.query.id, " not found");
@@ -47,25 +34,19 @@ REST_Voters = function (req, res) {
         }
         // we have the user record in "voter", now let's retrieve the project he can vote to
 
-        switch (cfg.cfgGetRoundNumber()) {
-            case 0: // no voting yet, so not project to vote for.
-                res.json({result: "Found", user: voter, round: cfg.cfgGetRoundNumber()});
-                break;
-            case 1:// first round, projects per BU
-                logic.getBuProjectsEx(voter.project, voter.bu, function (err, rr)
-                    {
-                    res.json({result: "Found", user: voter, projects: rr, round: cfg.cfgGetRoundNumber()});
-                    });
-                break;
-            case 2: // second round - final projects
-                logic.dbGetFinalProjectToVote(function (rr) {
-                    res.json({result: "Found", user: voter, projects: rr, round: cfg.cfgGetRoundNumber()});
+        // @TBD change that the projects are not the finals
+        logic.dbGetFinalProjectToVote(function (ProjectsSet) {
+            res.json({
+                result: "Found",
+                user: voter,
+                projects: ProjectsSet,
+                NOM: cfg.getNumOfNominates()
+            });
 
-                });
-                break;
-        }
+        });
     });
-}
+};
+
 
 /**
  * Perform the actual voting
@@ -73,37 +54,7 @@ REST_Voters = function (req, res) {
  * @param res
  * @constructor
  */
-REST_VoteDepracted = function (req, res)
-{
-
-    console.log(cfg.getTimeStamp()," REST_Vote |info|"
-        , "id=",      req.query.id
-        , "token=",   req.query.token
-        , "project=", req.query.project);
-
-// validate that query parameters do exist
-    if (!req.query.id || !req.query.token || !req.query.project) {
-        res.json({result: "Error: ++++++++++ Invalid query string parameters."});
-        console.error(cfg.getTimeStamp()," REST_Vote |error|"
-            , "Invalid query string parameters "
-            , "id=",      req.query.id
-            , "token=",   req.query.token
-            , "project=", req.query.project);
-    }
-    else {
-        logic.doVote(req.query.id, req.query.token, req.query.project, function (cb) {
-            res.json(cb);
-        })
-    }
-}
-
-/**
- * Perform the actual voting
- * @param req
- * @param res
- * @constructor
- */
-REST_Vote = function (req, res)
+var REST_Vote = function (req, res)
 {
     cfg.logInfo('REST', "REST_Vote"
         + " id=" +       req.query.id
@@ -133,7 +84,7 @@ REST_Vote = function (req, res)
             res.json(cb);
         })
     }
-}
+};
 
 /** Retrieve project details and associates users
  *
@@ -141,7 +92,7 @@ REST_Vote = function (req, res)
  * @param res
  * @constructor
  */
-REST_Project = function(req, res)
+var REST_Project = function(req, res)
 {
     console.log(cfg.getTimeStamp(),"REST_Project |info|", "project id=", req.query.id);
 
@@ -158,7 +109,7 @@ REST_Project = function(req, res)
             });
         });
     }
-}
+};
 
 REST_Projects = function(req, res)
 {
@@ -173,8 +124,7 @@ REST_Projects = function(req, res)
             });*/
 
     });
-}
-
+};
 
 REST_ResetVotes = function(req, res)
 {
@@ -213,6 +163,7 @@ module.exports.REST_Project = REST_Project;
 module.exports.REST_ResetVotes = REST_ResetVotes;
 module.exports.REST_stat = REST_stat;
 module.exports.REST_Projects = REST_Projects;
+
 
 
 /*
@@ -255,3 +206,88 @@ group by BU:
 
 
  */
+
+
+REST_VotersDeprecated = function (req, res) {
+
+    console.log(cfg.getLogHeader('REST', 'INFO')
+        , "id=", req.query.id);
+
+    // user id query field is mandatory
+    if (!req.query.id) {
+        console.error(cfg.getLogHeader('REST', 'ERROR'), " REST_Voters"
+            , " user id "
+            , req.query.id
+            , " is missing");
+
+        res.json({result: "Error: User ID query string parameter is mandatory"});
+        return;
+    }
+
+    // look for specific user in database
+    logic.findVoter(req.query.id, function (err, voter) {
+        console.log(cfg.getTimeStamp(), " REST_Voters |info|"
+            , " result=", "\n", voter, "\n"
+            , "err=", err);
+
+        if (voter == null) {
+            console.warn(cfg.getTimeStamp(), " REST_Voters |warn|",
+                req.query.id, " not found");
+
+            res.json({result: "Not Found"});
+            return;
+        }
+        // we have the user record in "voter", now let's retrieve the project he can vote to
+
+        switch (cfg.cfgGetRoundNumber()) {
+            case 0: // no voting yet, so not project to vote for.
+                res.json({result: "Found", user: voter, NOM: cfg.getNumOfNominates()});
+                break;
+            case 1:// first round, projects per BU
+                logic.getBuProjectsEx(voter.project, voter.bu, function (err, rr) {
+                    res.json({result: "Found", user: voter, projects: rr, NOM: cfg.getNumOfNominates()});
+                });
+                break;
+            case 2: // second round - final projects
+                logic.dbGetFinalProjectToVote(function (rr) {
+                    res.json({result: "Found", user: voter, projects: rr, NOM: cfg.getNumOfNominates()});
+
+                });
+                break;
+        }
+    });
+};
+
+
+ /**
+ * Perform the actual voting
+ * @param req
+ * @param res
+ * @constructor
+ */
+/*
+REST_VoteDepracted = function (req, res)
+    {
+
+        console.log(cfg.getTimeStamp()," REST_Vote |info|"
+            , "id=",      req.query.id
+            , "token=",   req.query.token
+            , "project=", req.query.project);
+
+// validate that query parameters do exist
+        if (!req.query.id || !req.query.token || !req.query.project) {
+            res.json({result: "Error: ++++++++++ Invalid query string parameters."});
+            getVotes console.error(cfg.getTimeStamp()," REST_Vote |error|"
+                , "Invalid query string parameters "
+                , "id=",      req.query.id
+                , "token=",   req.query.token
+                , "project=", req.query.project);
+        }
+        else {
+            logic.doVote(req.query.id, req.query.token, req.query.project, function (cb) {
+                res.json(cb);
+            })
+        }
+    }
+*/
+
