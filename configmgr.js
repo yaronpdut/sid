@@ -89,17 +89,17 @@ var getLogHeader = function(serviceName, sevirity)
 
 var logInfo = function()
 {
-    console.log(getLogHeader(arguments[0], 'INFO'),arguments[1]);
+    console.log(getLogHeader(arguments[0], 'INFO ') + arguments[1]);
 }
 
 var logError = function()
 {
-    console.log(getLogHeader(arguments[0], 'ERROR'),arguments[1]);
+    console.log(getLogHeader(arguments[0], 'ERROR')+arguments[1]);
 }
 
 var getNumOfNominates = function()
 {
-    return 3;
+    return 5;
 }
 
 module.exports.getNumOfNominates =getNumOfNominates;

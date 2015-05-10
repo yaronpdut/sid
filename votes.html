@@ -6,53 +6,112 @@
 </head>
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
+<script src="http://www.amcharts.com/lib/3/amcharts.js"></script>
+<script src="http://www.amcharts.com/lib/3/serial.js"></script>
+<script src="http://www.amcharts.com/lib/3/themes/dark.js"></script>
+
+<link rel="stylesheet" href="css/votes.css" />
+
 <script>
 
+    var getHeader = function () {
+        return '<thead><tr><th align="center">Code</th><th align="center"># of Votes</th><th align="center">Weighted</th><th>2-5</th></tr></thead>';
+    };
 
-    $(document).ready(function()
-    {
-        console.log("Hello");
+    var processTable = function (response) {
         var VotesTbl;
+        var trHTML = '';
+        var items = []
+        trHTML += getHeader();
 
-        $.ajax({
-            url: 'votes',
-            type: 'GET',
-            success: function (response) {
-                var trHTML = '';
-                trHTML += '<tr><th>Code</th><th>Name</th><th># of Votes</th><th>Description</th></tr>';
+        $.each(response, function (i, item) {
+            if (item._id != "") {
 
-                $.each(response, function (i, item) {
-                    if (item._id != "") {
+                if (typeof(item.project) == undefined)
+                    item.project.projectCode = "UNDEF";
 
-                        if(typeof(item.project) == undefined)
-                            item.project.project_name = "UNDEF";
+                items.push({"x": item.projectCode + ':' + item.project_name , "y": item.weightValue});
 
-                        trHTML += '<tr>'
-                        + '<td>' + item.projectCode + '</td>'
-                        + '<td>'
-                                + '<a href="project?id=' + item.projectCode + '">' + item.project.project_name + '</a>'
-                        + '</td>'
-                        + '<td>' + item.value + '</td>'
-                        + '<td>' + item.project.description + '</td>'
+                trHTML += '<tr>'
+                        + '<td align="center"><a href="project?id=' + item.projectCode + '">' + item.projectCode + '</a></td>'
+                        + '<td align="center">' + item.value + '</td>'
+                        + '<td align="center">' + item.weightValue + '</td>'
+                        + '<td align="center">' + item.weightValue2 + '</td>'
                         + '</tr>';
-                    }
-                });
-                console.log(trHTML);
-                $('#records_table').append(trHTML);
             }
         });
+        console.log(trHTML);
+        $('#datagrid').append(trHTML);
+        $('#datagrid').addClass("sortable");
+        $.getScript("js/sorttable.js");
 
+        var container = document.getElementById('visualization');
+
+        var chart = AmCharts.makeChart("visualization", {
+            "type": "serial",
+            "theme": "dark",
+            "path": "http://www.amcharts.com/lib/3/",
+            "dataProvider": items,
+            "valueAxes": [{
+                "gridColor": "#FFFFFF",
+                "gridAlpha": 0.2,
+                "dashLength": 0
+            }],
+            "gridAboveGraphs": true,
+            "startDuration": 1,
+            "graphs": [{
+                "balloonText": "[[category]]: <b>[[value]]</b>",
+                "fillAlphas": 0.8,
+                "lineAlpha": 0.2,
+                "type": "column",
+                "valueField": "y"
+            }],
+            "chartCursor": {
+                "categoryBalloonEnabled": false,
+                "cursorAlpha": 0,
+                "zoomable": false
+            },
+            "categoryField": "x",
+            "categoryAxis": {
+                "gridPosition": "start",
+                "gridAlpha": 0,
+                "tickPosition": "start",
+                "tickLength": 20
+            },
+            "export": {
+                "enabled": true
+            }
+
+        });
+        $("#graphcontainer").show();
+
+    };
+
+    $(document).ready(function () {
+        $("#graphcontainer").hide();
+
+        console.log("Hello");
+        $.ajax({url: 'votes', type: 'GET', success: processTable});
     });
 
 </script>
+
+
+<div id="graphcontainer">
 
 <H2>Voting Summary</H2>
 
 <div >
 
-    <table id="records_table" border='0'>
+    <table id="datagrid" cellspacing="1" border="1" class="datagrid" align="center" border="1">
     </table>
 
+</div>
+
+<H2>Weight Voting Summary</H2>
+
+<div id="visualization"></div>
 </div>
 </body>
 </html>

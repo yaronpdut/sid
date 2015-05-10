@@ -94,20 +94,19 @@ var theApplication = function() {
      */
     self.createRoutes = function() {
         self.postRoutes = [];
-        self.postRoutes ['/vote']    = rest_routes.REST_Vote;
+        self.postRoutes ['/vote']    = rest_routes.REST_SubmitUserVote;
 
 
         self.routes = { };
 
-        self.routes['/votes']       = rest_routes.REST_Votes;
-        self.routes['/voters']      = rest_routes.REST_Voters;
-        self.routes['/vote']        = rest_routes.REST_Vote;
-        self.routes['/project']     = rest_routes.REST_Project;
-        self.routes['/projects']    = rest_routes.REST_Projects;
-        self.routes['/resetv']      =   rest_routes.REST_ResetVotes;
-        self.routes['/stat']        = rest_routes.REST_stat;
-
-
+        self.routes['/votes']       = rest_routes.REST_GetVotingSummary;
+        self.routes['/voters']      = rest_routes.REST_GetVoterInfo;
+        self.routes['/vote']        = rest_routes.REST_SubmitUserVote;
+        self.routes['/project']     = rest_routes.REST_GetProjectInfo;
+        self.routes['/projects']    = rest_routes.REST_GetProjectsList;
+        self.routes['/resetv']      = rest_routes.REST_ResetVotes;
+        self.routes['/stat']        = rest_routes.REST_GetStatistics;
+        self.routes['/login']       = rest_routes.REST_CheckUserCredentials;
 
         self.routes['/asciimo'] = function(req, res) {
             var link = "http://i.imgur.com/kmbjB.png";
