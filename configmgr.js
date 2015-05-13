@@ -1,5 +1,4 @@
-var config = require('config')
-    , fs = require('fs')
+var fs = require('fs')
     , Datastore = require('nedb') // https://github.com/louischatriot/nedb
     ,util = require('util');
 
@@ -31,30 +30,6 @@ function getTimeStampTime() {
 
 
 }
-
-/***
- * Get Round Number
- * @return {number}
- */
-var cfgGetRoundNumber = function () {
-        return 1;
-        var voting = config.get('Voting');
-        var d = new Date();
-
-        var Start, End, current;
-
-        Start = new Date(Date.parse(voting.Round == 1 ? voting.Round1.Start : voting.Round2.Start));
-        End = new Date(Date.parse(voting.Round == 1 ? voting.Round1.End : voting.Round2.End));
-        current = d.getTime().valueOf();
-        console.log(Start);
-        if (((current - Start.valueOf()) > 0) && ((End.valueOf() - current) > 0)) {
-            return 1;
-        }
-        else {
-            return 0;
-
-        }
-    };
 
 
 cfgGetDbHandle = function (name) {
@@ -106,7 +81,6 @@ module.exports.getNumOfNominates =getNumOfNominates;
 module.exports.getLogHeader = getLogHeader;
 module.exports.logInfo = logInfo;
 module.exports.logError = logError;
-module.exports.cfgGetRoundNumber = cfgGetRoundNumber;
 module.exports.cfgGetDbHandle = cfgGetDbHandle;
 module.exports.getTimeStamp = getTimeStamp;
 

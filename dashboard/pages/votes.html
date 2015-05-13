@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+<link rel="stylesheet" href="/css/dashboard.css" />
+<script src="/js/ng-google-chart.js"></script>
+
+<div ng-hide="global.graphstate" >
+    <p class="blink">Loading....</p>
+</div>
+
+<div ng-show="global.graphstate" ng-app="dashboardApp" ng-controller="votesController">
+
+    <table class="tg" align="center" id="votestbl">
+        <tr>
+            <th >Code</th>
+            <th >Name</th>
+            <th >Count</th>
+            <th >Weighted Count</th>
+            <th >2...5</th>
+        </tr>
+        <tr ng-repeat="x in votestbl">
+            <td>{{ x.projectCode }}</td>
+            <td class="tg-0ord">{{ x.project_name }}</td>
+            <td>{{ x.value }}</td>
+            <td>{{ x.weightValue }}</td>
+            <td>{{ x.weightValue2 }}</td>
+        </tr>
+    </table>
+
+
+    <div google-chart chart="chartObject" align="center"></div>
+
+</div>
+
+</div>
+
+</body>
+</html>

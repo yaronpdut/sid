@@ -1,8 +1,7 @@
 var express = require('express');
 var logic = require('./logic');
+var fs =  require('fs');
 var cfg = require('./configmgr');
-var config = require('config');
-
 /*
 
     WorkFlow:
@@ -37,7 +36,8 @@ var REST_CheckUserCredentials = function (req, res) {
         if (voter.emp_number == req.query.token) {
             res.json({
                     result: "OK",
-                    voted: typeof(voter.rating) !== 'undefined'
+                    voted: typeof(voter.rating) !== 'undefined',
+                    "state" :  fs.existsSync('vote.flg')
                 }
             );
         }
@@ -89,7 +89,9 @@ var REST_GetVoterInfo = function (req, res) {
                 result: "Found",
                 user: voter,
                 projects: ProjectsSet,
-                NOM: cfg.getNumOfNominates()
+                NOM: cfg.getNumOfNominates(),
+                "state" :  fs.existsSync('vote.flg')
+
             });
 
         });
@@ -157,6 +159,9 @@ REST_GetProjectsList = function (req, res) {
 };
 
 REST_ResetVotes = function (req, res) {
+    if(req.query.id != "71029")
+        return;
+    
     cfg.logInfo('"REST', "REST_ResetVotes");
     logic.dbResetVotes(function (err) {
         cfg.logInfo('"REST', " REST_ResetVotes done");
@@ -165,15 +170,42 @@ REST_ResetVotes = function (req, res) {
     })
 };
 
+var REST_SetVoteState = function (req, res) {
+    cfg.logInfo('"REST', "REST_SetVoteState");
+
+    if(!req.query.state) {
+        res.json({result: "state parameter is missing"})
+    }
+    else {    
+        if(req.query.state == "1")
+        {
+            fs.open('vote.flg', 'w+', 0666, function(err, fd) {
+                res.json({result: "OK"})
+                fs.close(fd);
+            } );
+        }
+        else 
+        {
+            fs.unlink('vote.flg');
+            res.json({result: "OK"})
+        }
+    }
+}
+
+
 var REST_GetStatistics = function (req, res) {
-    var voting = config.get('Voting');
+
     cfg.logInfo('"REST', "REST_GetStatistics");
 
     var rres = {};
 
+    rres.state =  fs.existsSync('vote.flg');
+
     logic.dbNumberOfVoters(function (ares) {
         rres.db_stat = ares;
+
         res.json(rres);
+
 
     });
 };
@@ -187,3 +219,7 @@ module.exports.REST_ResetVotes = REST_ResetVotes;
 module.exports.REST_GetStatistics = REST_GetStatistics;
 module.exports.REST_GetProjectsList = REST_GetProjectsList;
 module.exports.REST_CheckUserCredentials = REST_CheckUserCredentials;
+module.exports.REST_SetVoteState = REST_SetVoteState;
+
+
+

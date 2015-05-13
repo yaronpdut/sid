@@ -106,6 +106,7 @@ var theApplication = function() {
         self.routes['/projects']    = rest_routes.REST_GetProjectsList;
         self.routes['/resetv']      = rest_routes.REST_ResetVotes;
         self.routes['/stat']        = rest_routes.REST_GetStatistics;
+        self.routes['/state']       = rest_routes.REST_SetVoteState;
         self.routes['/login']       = rest_routes.REST_CheckUserCredentials;
 
         self.routes['/asciimo'] = function(req, res) {

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
     <meta charset="utf-8"/>
     <title></title>
@@ -10,114 +11,33 @@
 
 <style>
 
-    .horizontal-nav {
-        background: #efefef;
-        border-radius: 6px;
+    body {
+        font: normal 16px/1 "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+        color: rgba(255,255,255,1);
+        background: rgb(0,0,0);
+
     }
 
-    .horizontal-nav ul {
-        background: #128F9A;
-        float: left;
-        text-align: center;
-        border-radius: 3px;
-        border: 1px solid #0e7079;
+    .mainbody a {
+        color: rgba(255,255,255,1);
+
+
     }
 
-    .horizontal-nav ul li {
-        float: left;
-        border-left: 1px solid #0e7079;
-    }
-
-    .horizontal-nav ul li:first-child {
-        border-left: 0 none;
-    }
-
-    .horizontal-nav ul li a {
-        display: block;
-        padding: 10px 20px;
-        color: #fff;
-        border-top: 1px solid rgba(255, 255, 255, 0.25);
-        border-left: 1px solid rgba(255, 255, 255, 0.25);
-    }
-
-    .horizontal-nav ul li:first-child a {
-        border-left: 0 none;
-    }
-
-    .horizontal-nav ul li a:hover {
-        background: #12808a;
-    }
-
-    .horizontal-nav ul li:first-child a {
-        border-top-left-radius: 3px;
-        border-bottom-left-radius: 3px;
-    }
-
-    .horizontal-nav ul li:last-child a {
-        border-top-right-radius: 3px;
-        border-bottom-right-radius: 3px;
-    }
 </style>
 
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-<script src="js/jquery.horizontalNav.js"></script>
-
-
-<script>
-    $(document).ready(function () {
-        $('.nav-wrapper').horizontalNav();
-
-        $("#votingSummary").bind("click", function () {
-            $.get("votes.html", function (data) {
-                $('.internalV').html(data);
-            });
-        });
-
-        $("#projects").bind("click", function () {
-            $.get("projects.html", function (data) {
-                $('.internalV').html(data);
-            });
-        });
-
-        $("#voterrecord").bind("click", function () {
-            $.get("voter.html", function (data) {
-                $('.internalV').html(data);
-            });
-        });
-
-        $("#projrecord").bind("click", function () {
-            $.get("projectinfo.html", function (data) {
-                $('.internalV').html(data);
-            });
-        });
-
-
-        /*
-
-
-         <form action="resetv">
-         Reset Votes:&nbsp;<input type="submit"/>&nbsp;</form>
-         </body>
-
-         */
-    });
-</script>
+<div class="mainbody">
 
 <h1> Ship It! Day Dashboard</h1>
-<nav class="horizontal-nav full-width horizontalNav-notprocessed nav-wrapper">
-    <ul>
-        <li><a href="#" id="votingSummary">Voting Summary</a></li>
-        <li><a href="#" id="projects"> Projects</a></li>
-        <li><a href="#" id="voterrecord"> Voter info</a></li>
-        <li><a href="#" id="projrecord"> Projects info</a></li>
-        <li><a href="#" id="stat"> Statistics</a></li>
-        <li><a href="#" id="resetv"> Reset Voting</a></li>
-    </ul>
-</nav>
 
+<ul>
+    <li><a href="votes.html">Voting Summary</a></li>
+    <li><a href="projects.html"> Projects</a></li>
+    <li><a href="voter.html"> Voter info</a></li>
+    <li><a href="projectinfo.html"> Projects info</a></li>
+    <li><a href="stat" > Statistics</a></li>
+    <li><a href="resetv" id=""> Reset Voting</a></li>
+</ul>
 
-<div class="internalV">
-    <p></p>
 </div>
-
 </html>

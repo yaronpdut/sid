@@ -3,17 +3,13 @@
     <head>
         <!-- App stuff -->
         <link rel="stylesheet" href="css/app.css" />
+        <link href="css/bootstrap.css" rel="stylesheet">
         <link href="css/kendo.mobile.all.min.css" rel="stylesheet" type="text/css" />
+        <link href="css/style.css" rel="stylesheet" type="text/css" />
     </head>
     <body>
         <div data-role="layout" data-id="main-layout">
-            <header data-role="header">
-                <div data-role="navbar">
-                    <a data-role="button" data-rel="drawer" href="#my-drawer" data-align="left"><img src="images/hamburger.png" width="16" height="16" alt=""></a>
 
-                    <span class="white">Ship It!</span>&nbsp;<span class="blue">NICE</span>
-                </div>
-            </header>
         </div>
 
         <div data-role="layout" data-id="back-layout">
@@ -25,49 +21,49 @@
 
                     <span class="white">Ship It!</span>&nbsp;<span class="blue">NICE</span>
                 </div>
+
             </header>
         </div>
 
-        <div data-role="layout" data-id="login-layout">
-            <div data-role="footer">
-            </div>
-        </div>
-
-
-        <div id="login-view" data-layout="login-layout" class="no-back" data-role="view" data-title="Ship It! NICE Voting" data-model="mainModel">
-            <img class="center" src="images/shipit-logo.png"/>
-            <ul data-role="listview" data-style="inset">
-                <li><label for="username">Username: <input type="text" id="username" /></label></li>
-                <li><label for="password">Password: <input type="password" id="password" /></label></li>
-            </ul>
-
+        <div id="login-view"  data-role="view" data-title="Ship It! NICE Voting" data-model="mainModel">
+            <img class="center" src="images/login.png" style="margin-bottom: 10px"/>
             <div class="center">
-                <a class="login-button blue-button" data-role="button" data-bind="click: login">Login</a><br />
+                <input class="login-input" type="text" data-style="inset" id="username" placeholder="Email Address" style="height: 36px; width: 90%"/>
+                <input class="login-input" type="password" data-style="inset" id="password" placeholder="Employee Badge Number" style="height: 36px; width: 90%"/>
+                <a class="login-button blue-button" data-role="button" data-bind="click: login" style="padding-top: 4px;padding-bottom: 1px; height: 36px;width: 90%"><b>Login</b></a><br />
             </div>
-
-            <img class="center nicelogo" src="images/nicelogo-white.png"/>
+            <img class="center" src="images/nicelogo-white.png"/>
+            <div class="cd-popup" role="alert">
+                <div class="cd-popup-container">
+                    <div class="popup-content">
+                        <p>Join us at the end of Ship it day to see who won!</p>
+                    </div>
+                    <div class="popup-button-options">
+                        <span class="btn-close-popup" style="color: #76b6b0;cursor: pointer; cursor: hand;">CLOSE</span>
+                    </div>
+                </div> <!-- cd-popup-container -->
+            </div> <!-- cd-popup -->
         </div>
 
         <div class="no-back" data-role="view" id="projects-view" data-title="Select A Project" data-layout="main-layout" data-model="mainModel">
-            <ul data-role="listview" data-style="inset" data-type="group" data-template="item-template" data-source="projectsDataSource"  id="project-list" data-click="mainModel.showDetail">
+            <header data-role="header">
+                <div data-role="navbar" style="box-shadow: 5px 5px 5px #888888;margin-bottom:5px;">
+                    <img src="images/logo.png" width="60px"/>
+                </div>
+                <div style="background-color: #f6f6f6; color: #868686;padding-top:12px;padding-bottom:12px;">
+                    <span style="padding-left: 10px;">Drag and drop to order the projects by rank</span>
+
+                </div>
+                <hr style="color: #f6f6f6; margin: 0px; "/>
+            </header>
+            <ul data-role="listview" data-style="inset" data-type="group" data-template="item-template" data-source="projectsDataSource"  id="projectsTable" style="margin-top: 10px;padding-bottom: 20px">
             </ul>
-        </div>
+            <div id="submit-footer" data-role="footer" data-position="fixed" style="background-color:#f6f6f6;text-align:center;">
+                <a class="login-button blue-button" data-role="button" data-bind="click: submitVote" style="padding-top: 4px;padding-bottom: 1px;margin-top: 10px;margin-bottom: 10px; height: 36px; width: 90%"><b>Submit Your Vote!</b></a><br />
 
-        <div data-role="view" id="details-view" data-title="Vote" data-layout="back-layout" data-model="mainModel">
-            <img src="images/i3.jpg" title="Some picture" width="100%" height="auto"/>
 
-            <h3 data-bind="text:project.project_name">Application</h3>
-            <p data-bind="text:project.description"></p>
-
-            <h3>Developed by</h3>
-            <p>Doc, Grumpy, Happy, Sleepy, Sneezy, Dopey</p>
-
-            <h3>Location</h3>
-            <p data-bind="text:user.site"></p>
-
-            <div class="buttons">
-                <a class="pinkish-button" data-role="button" data-bind="click: vote">Vote for this application!</a><br />
             </div>
+
         </div>
 
         <div class="no-back" data-role="view" data-title="Thank You" id="voted-view" data-model="mainModel" data-layout="back-layout">
@@ -77,36 +73,23 @@
             </p>
         </div>
 
-        <div class="no-about" data-role="view" data-title="About" id="about-view" data-layout="back-layout">
-            <h1>About Ship It! NICE</h1>
-
-            <h2>Back End Engineering</h2>
-            <p>Yaron Pdut</p>
-
-            <h2>Front End Engineering</h2>
-            <p>Scott Walter</p>
-
-            <h2>Infrastructure</h2>
-            <p>Yaron Pdut</p>
-
-            <h2>Design</h2>
-            <p>Shafir Balitsky</p>
-        </div>
-
-        <div data-role="drawer" id="my-drawer" data-views="['projects-view']">
-            <img class="nicelogo" src="images/nicelogo-white.png"/>
-
-            <div class="drawer-links">
-                <a href="#about-view" class="drawer-link active">About</a>
-            </div>
-        </div>
+        <div class="cd-popup" role="alert" id="cd-popup-and-reset" style="z-index:9999;">
+            <div class="cd-popup-container">
+                <div class="popup-content">
+                    <p>Join us at the end of Ship it day to see who won!</p>
+                </div>
+                <div class="popup-button-options" id="btn-close-popup-and-reset">
+                    <span class="btn-close-popup-and-reset" style="color: #76b6b0;cursor: pointer; cursor: hand;">CLOSE</span>
+                </div>
+            </div> <!-- cd-popup-container -->
+        </div> <!-- cd-popup -->
 
         <script type="text/x-kendo-template" id="item-template">
-            <div class="item-info">
-                <img class="project-icon" src="images/circle.png" width="32" height="32"/>
+            <div class="item-info" id="{project_code}" style="position: relative">
+                <img class="project-icon" src="images/grip.png" height="15px" width="15px"
+                style="position: absolute;top: 30%;"/>
                 <div class="item-details">
-                    <h3>${project_name}</h3>
-                    <p>${description}</p>
+                    <h3 style="margin: 0px;">${project_name}</h3>
                 </div>
             </div>
         </script>
@@ -114,5 +97,53 @@
         <script src="js/jquery.min.js"></script>
         <script src="js/kendo.all.min.js"></script>
         <script src="js/app.js"></script>
+        <script>
+            $(document).ready(function() {
+                $("#projectsTable").kendoSortable({
+                    hint:function(element) {
+                        return element.clone().addClass("hint");
+                    },
+                    placeholder:function(element) {
+                        return element.clone().addClass("placeholder").html('<img style="margin-left: 10px; margin-top: 12px; margin-bottom: 12px;" class="project-icon" src="images/grip.png" height="15px" width="15px" />');
+                    },
+                    disabled: ".disabled",
+                    ignore: "h3"
+                    //holdToDrag: true
+                });
+
+                $('.cd-popup-trigger').on('click', function(event){
+                    event.preventDefault();
+                    $('.cd-popup').addClass('is-visible');
+                });
+                
+                //close popup
+                $('.cd-popup').on('click', function(event){
+                    if( $(event.target).is('.cd-popup-close') || $(event.target).is('.cd-popup') ) {
+                        event.preventDefault();
+                        $(this).removeClass('is-visible');
+                    }
+                });
+
+                $('.btn-close-popup').on('click', function(event){
+                    $('.cd-popup').removeClass('is-visible');
+                });
+
+
+                $('#btn-close-popup-and-reset').on('click', function(event){
+                    $('.cd-popup').removeClass('is-visible');
+                    mainModel.reset();
+                });
+
+                $('#cd-popup-and-reset').on('click', function(event){
+                    $('.cd-popup').removeClass('is-visible');
+                    mainModel.reset();
+                });
+
+            });
+
+            function afterShow(e) {
+                alert(e.view);
+            }
+        </script>
     </body>
 </html>
