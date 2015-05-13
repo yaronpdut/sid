@@ -139,4 +139,24 @@ dashboardApp.controller('projectsController', function ($scope, $http) {
 
 });
 
+dashboardApp.controller('statController', function ($scope, $http, $resource) {
+
+    var Stat = $resource('/stat');
+
+    Stat.get(function (response) {
+
+        $scope.voters = response.db_stat.numberOfVoters;
+        $scope.avoters =  response.db_stat.voted;
+        if(response.state)
+        {
+            $scope.vstate = "ON";
+        }
+        else
+        {
+            $scope.vstate = "OFF";
+        }
+    });
+
+
+});
 

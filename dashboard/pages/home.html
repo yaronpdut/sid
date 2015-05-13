@@ -1,13 +1,27 @@
 <style>
 
-body {
-	background-color: black;
-}
+    body {
+        background-color: #000000;
+        color: #FFFFFF;
+    }
 
-
-
+    .title {
+        background-color: #000000;
+        color: #FFFFFF;
+        font-family: verdana;
+        font-style: normal;
+        font-weight: bold;
+        font-size: 17px;
+        font-variant: normal;
+    }
 </style>
+
+
+<div id="stat" ng-app="dashboardApp" ng-controller="statController" align=center class="title">
+    <p>Number of potentials voters {{ voters }} | Already voted {{ avoters }} | Voting state {{ vstate }}</p>
+</div>
+
 <div class="text-center">
-	<img src="/images/shipit-logo.png">
+    <img src="/images/shipit-logo.png">
 
 </div>

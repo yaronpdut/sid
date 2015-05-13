@@ -96,3 +96,7 @@ xpopup
     margin: 8em auto;
   }
 }
+
+.invisible-element{
+  display: none;
+}

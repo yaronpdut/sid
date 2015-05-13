@@ -57,7 +57,11 @@
     line-height: 1em;
     margin: 0 0 0 .95em;
     width: 100%;
-    cursor: pointer; 
+
+}
+
+.item-info-cursor {
+    cursor: pointer;
     cursor: hand;
 }
 
@@ -145,6 +149,11 @@ div.center {
 
 .blue-button {
     background-color: #53a0cf !important;
+    color: white !important;
+}
+
+.gray-button {
+    background-color: #868686 !important;
     color: white !important;
 }
 
@@ -265,6 +274,11 @@ li.hint {
 }
 
 #projectsTable > li{
+    padding: 0px;
+    margin: 0;
+}
+
+#alreadyRankedTable > li{
     padding: 0px;
     margin: 0;
 }

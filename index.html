@@ -7,9 +7,8 @@
         <link href="css/kendo.mobile.all.min.css" rel="stylesheet" type="text/css" />
         <link href="css/style.css" rel="stylesheet" type="text/css" />
     </head>
-    <body>
+    <body onload="mainModel.init()">
         <div data-role="layout" data-id="main-layout">
-
         </div>
 
         <div data-role="layout" data-id="back-layout">
@@ -26,14 +25,14 @@
         </div>
 
         <div id="login-view"  data-role="view" data-title="Ship It! NICE Voting" data-model="mainModel">
-            <img class="center" src="images/login.png" style="margin-bottom: 10px"/>
+            <img class="center" src="images/login.png" style="margin-top: 40px;margin-bottom: 40px; width: 70%;"/>
             <div class="center">
                 <input class="login-input" type="text" data-style="inset" id="username" placeholder="Email Address" style="height: 36px; width: 90%"/>
                 <input class="login-input" type="password" data-style="inset" id="password" placeholder="Employee Badge Number" style="height: 36px; width: 90%"/>
                 <a class="login-button blue-button" data-role="button" data-bind="click: login" style="padding-top: 4px;padding-bottom: 1px; height: 36px;width: 90%"><b>Login</b></a><br />
             </div>
-            <img class="center" src="images/nicelogo-white.png"/>
-            <div class="cd-popup" role="alert">
+            <img class="center" src="images/nicelogo-white.png" style="margin-top: 20px"/>
+            <div class="cd-popup" role="alert" id="loginPopup">
                 <div class="cd-popup-container">
                     <div class="popup-content">
                         <p>Join us at the end of Ship it day to see who won!</p>
@@ -47,21 +46,23 @@
 
         <div class="no-back" data-role="view" id="projects-view" data-title="Select A Project" data-layout="main-layout" data-model="mainModel">
             <header data-role="header">
-                <div data-role="navbar" style="box-shadow: 5px 5px 5px #888888;margin-bottom:5px;">
+                <div data-role="navbar" style="box-shadow: 0px 5px 5px #888888;margin-bottom:5px;">
+                    <a data-role="button" data-rel="drawer" href="#my-drawer" data-align="left"><img src="images/hamburger.png" width="16" height="16" alt=""></a>
                     <img src="images/logo.png" width="60px"/>
                 </div>
-                <div style="background-color: #f6f6f6; color: #868686;padding-top:12px;padding-bottom:12px;">
-                    <span style="padding-left: 10px;">Drag and drop to order the projects by rank</span>
-
+                <div style="background-color: #f6f6f6; color: #868686;padding-top:8px;padding-bottom:8px;">
+                    <span id="top-message-before-vote" style="padding-left: 10px;">Drag and drop to order the projects by rank</span>
+                    <span id="top-message-after-vote" style="padding-left: 10px;">Thank you for voting!</span>
                 </div>
                 <hr style="color: #f6f6f6; margin: 0px; "/>
             </header>
-            <ul data-role="listview" data-style="inset" data-type="group" data-template="item-template" data-source="projectsDataSource"  id="projectsTable" style="margin-top: 10px;padding-bottom: 20px">
+            <ul data-role="listview" data-style="inset" data-type="group" data-template="item-template" data-source="projectsDataSource"  id="projectsTable" class="item-info-cursor" style="margin-top: 0px;padding-bottom: 20px">
+            </ul>
+            <ul data-role="listview" data-style="inset" data-type="group" data-template="item-template" data-source="projectsDataSource"  id="alreadyRankedTable" style="margin-top: 0px;padding-bottom: 20px">
             </ul>
             <div id="submit-footer" data-role="footer" data-position="fixed" style="background-color:#f6f6f6;text-align:center;">
-                <a class="login-button blue-button" data-role="button" data-bind="click: submitVote" style="padding-top: 4px;padding-bottom: 1px;margin-top: 10px;margin-bottom: 10px; height: 36px; width: 90%"><b>Submit Your Vote!</b></a><br />
-
-
+                <a id="submitButton" class="login-button blue-button" data-role="button" data-bind="click: submitVote" style="padding-top: 4px;padding-bottom: 1px;margin-top: 10px;margin-bottom: 10px; height: 36px; width: 90%"><b>Submit Your Vote!</b></a>
+                <a id="logoutButton" class="login-button gray-button" data-role="button" data-bind="click: logout" style="padding-top: 4px;padding-bottom: 1px;margin-top: 10px;margin-bottom: 10px; height: 36px; width: 90%"><b>Log out</b></a>
             </div>
 
         </div>
@@ -73,13 +74,43 @@
             </p>
         </div>
 
-        <div class="cd-popup" role="alert" id="cd-popup-and-reset" style="z-index:9999;">
+        <div class="no-about" data-role="view" data-title="About" id="about-view" data-layout="back-layout">
+            <h2>About Ship It! NICE</h2>
+
+            <h3>Back End Engineering</h3>
+            <p>Yaron Pdut</p>
+
+            <h3>Design</h3>
+            <p>Shafir Balitsky</p>
+
+            <h3>Front End Engineering</h3>
+            <p>Scott Walter</p>
+            <p>Avshalom Schwartz</p>
+
+            <h3>Infrastructure</h3>
+            <p>Yaron Pdut</p>
+
+
+        </div>
+
+        <div data-role="drawer" id="my-drawer" data-views="['projects-view']">
+            <img class="nicelogo" src="images/nicelogo-white.png"/>
+
+            <div class="drawer-links">
+                <a href="#about-view" class="drawer-link active">About</a>
+            </div>
+        </div>
+
+
+        <div class="cd-popup" role="alert" id="projectsPopup" style="z-index:9999;">
             <div class="cd-popup-container">
                 <div class="popup-content">
-                    <p>Join us at the end of Ship it day to see who won!</p>
+                    <p></p>
                 </div>
-                <div class="popup-button-options" id="btn-close-popup-and-reset">
-                    <span class="btn-close-popup-and-reset" style="color: #76b6b0;cursor: pointer; cursor: hand;">CLOSE</span>
+
+                <div class="popup-button-options" >
+                    <span class="btn-close-popup" id="btn-close-popup-and-reset" style="color: #76b6b0;cursor: pointer; cursor: hand;margin-right: 20px">LOG OUT</span>
+                    <span class="btn-close-popup" id="btn-close-popup" style="color: #76b6b0;cursor: pointer; cursor: hand;">CLOSE</span>
                 </div>
             </div> <!-- cd-popup-container -->
         </div> <!-- cd-popup -->
@@ -89,7 +120,7 @@
                 <img class="project-icon" src="images/grip.png" height="15px" width="15px"
                 style="position: absolute;top: 30%;"/>
                 <div class="item-details">
-                    <h3 style="margin: 0px;">${project_name}</h3>
+                    <h3 style="margin: 0px;padding-top: 5px;padding-bottom: 5px;">${project_name}</h3>
                 </div>
             </div>
         </script>
@@ -131,18 +162,51 @@
 
                 $('#btn-close-popup-and-reset').on('click', function(event){
                     $('.cd-popup').removeClass('is-visible');
-                    mainModel.reset();
+                    mainModel.logout();
                 });
 
                 $('#cd-popup-and-reset').on('click', function(event){
                     $('.cd-popup').removeClass('is-visible');
-                    mainModel.reset();
+                    mainModel.logout();
                 });
 
             });
 
             function afterShow(e) {
                 alert(e.view);
+            }
+
+            function setCookie(cname, cvalue, exdays) {
+                var d = new Date();
+                d.setTime(d.getTime() + (exdays*24*60*60*1000));
+                var expires = "expires="+d.toUTCString();
+                document.cookie = cname + "=" + cvalue + "; " + expires;
+            }
+
+            function getCookie(cname) {
+                var name = cname + "=";
+                var ca = document.cookie.split(';');
+                for(var i=0; i<ca.length; i++) {
+                    var c = ca[i];
+                    while (c.charAt(0)==' ') c = c.substring(1);
+                    if (c.indexOf(name) == 0){
+                        console.log("Retrieving username from cookie: " + c.substring(name.length, c.length));
+                        return c.substring(name.length, c.length);
+                    }
+                }
+                return "";
+            }
+
+            function checkCookie() {
+                var user = getCookie("username");
+                if (user != "") {
+                    alert("Welcome again " + user);
+                } else {
+                    user = prompt("Please enter your name:", "");
+                    if (user != "" && user != null) {
+                        setCookie("username", user, 365);
+                    }
+                }
             }
         </script>
     </body>
