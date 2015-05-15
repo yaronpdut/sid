@@ -44,7 +44,9 @@ mainModel =  kendo.observable({
                 console.log(data);
                 if(data.result.toLowerCase() == "ok") {
                     mainModel.setCookie("username",username, 10);
-                    if(data.voted == true) {
+                    if(data.state != true){
+                        mainModel.popupMessage("loginPopup", "<div style='text-align: left;'><h3>Voting is closed</h3></div><br/><div style='text-align: left;'>Voting system is not available.</div>");
+                    }else if(data.voted == true) {
                         //mainModel.popupMessage(alreadyVotedMessage);
                         loggedUserId = username;
                         loggedUserToken = password;
@@ -63,10 +65,6 @@ mainModel =  kendo.observable({
              }).fail(function() {
                 console.log('there was an error in login process');
             });
-    },
-
-    getAlreadyVotedProjects: function(){
-
     },
 
     getProjects: function(alreadyVoted){

@@ -220,6 +220,3 @@ module.exports.REST_GetStatistics = REST_GetStatistics;
 module.exports.REST_GetProjectsList = REST_GetProjectsList;
 module.exports.REST_CheckUserCredentials = REST_CheckUserCredentials;
 module.exports.REST_SetVoteState = REST_SetVoteState;
-
-
-

@@ -114,6 +114,13 @@ var theApplication = function() {
             res.send("<html><body><img src='" + link + "'></body></html>");
         };
 
+        self.routes['/dashboard/index.html'] = function(req, res) {
+            var url = '/dashboard/index.html';
+            url = url.indexOf('?')<0 ? url : url.substring(0,url.indexOf('?'));
+            res.contentType(url.substring(url.lastIndexOf('/')+1));
+            res.sendfile('./' + url);
+        };
+
         self.routes['*'] = function(req, res) {
             var url = req.originalUrl;
             if(url==='/') {
@@ -135,9 +142,21 @@ var theApplication = function() {
         self.createRoutes();
         self.app = express(); // .createServer() deprecated;
 
+        // Synchronous Function
+        var auth = express.basicAuth(function (user, pass) {
+            return user === 'admin' && pass === 'admin';
+        });
+
         //  Add handlers for the app (from the routes). yaron
+        //
         for (var r in self.routes) {
-            self.app.get(r, self.routes[r]);
+            if(r == '/dashboard/index.html'){
+                self.app.get(r, auth, self.routes[r]);
+
+            }
+            else {
+                self.app.get(r, self.routes[r]);
+            }
         }
 
 
