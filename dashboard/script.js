@@ -1,5 +1,5 @@
 // create the module and name it dashboardApp
-var dashboardApp = angular.module('dashboardApp',  ['ngResource', 'ngRoute', "googlechart"]);
+var dashboardApp = angular.module('dashboardApp', ['ngResource', 'ngRoute', "googlechart"]);
 
 // configure our routes
 dashboardApp.config(function ($routeProvider) {
@@ -27,6 +27,10 @@ dashboardApp.config(function ($routeProvider) {
             templateUrl: 'pages/votes.html',
             controller: 'votesController'
         })
+        .when('/voters/', {
+            templateUrl: 'pages/voters.html',
+            controller: 'votersController'
+        })
         .when('/projects', {
             templateUrl: 'pages/projects.html',
             controller: 'projectsController'
@@ -51,9 +55,9 @@ dashboardApp.controller('contactController', function ($scope) {
 
 dashboardApp.controller('votesController', function ($scope, $http, $resource) {
 
-        $scope.global = {
-            graphstate: false,
-        };
+    $scope.global = {
+        graphstate: false,
+    };
 
     console.time("Calling Server");
 
@@ -64,19 +68,16 @@ dashboardApp.controller('votesController', function ($scope, $http, $resource) {
 
         console.timeEnd("Server Returns");
 
-        var round =1;
+        var round = 1;
         if (typeof($scope.votestbl) == 'undefined') {
             $scope.votestbl = [];
         }
 
-        else if($scope.votestbl.length > 0)
-        {
+        else if ($scope.votestbl.length > 0) {
             round = 2
         }
 
-        var ChartData = [
-
-        ];
+        var ChartData = [];
 
         var item;
         console.time("processing");
@@ -88,7 +89,7 @@ dashboardApp.controller('votesController', function ($scope, $http, $resource) {
                 if (typeof(item.project) == undefined)
                     item.project.projectCode = "UNDEF";
 
-                if(round == 1) {
+                if (round == 1) {
                     $scope.votestbl.push({
                         project_name: item.project_name,
                         projectCode: item.projectCode,
@@ -98,12 +99,12 @@ dashboardApp.controller('votesController', function ($scope, $http, $resource) {
                     });
                 }
                 ChartData.push(
-                    { c:
-                        [
-                            { v: item.project_name },
-                            { v: item.value },
-                            { v: item.weightValue },
-                            { v: item.weightValue2 }
+                    {
+                        c: [
+                            {v: item.project_name},
+                            {v: item.value},
+                            {v: item.weightValue},
+                            {v: item.weightValue2}
                         ]
                     }
                 );
@@ -114,12 +115,14 @@ dashboardApp.controller('votesController', function ($scope, $http, $resource) {
 
         $scope.chartObject = {};
 
-        $scope.chartObject.data = {"cols": [
-            {id: "t", label: "Project", type: "string"},
-            {id: "s", label: "Count", type: "number"},
-            {id: "s", label: "Weight", type: "number"},
-            {id: "s", label: "2...5", type: "number"}
-        ], "rows": ChartData};
+        $scope.chartObject.data = {
+            "cols": [
+                {id: "t", label: "Project", type: "string"},
+                {id: "s", label: "Count", type: "number"},
+                {id: "s", label: "Weight", type: "number"},
+                {id: "s", label: "2...5", type: "number"}
+            ], "rows": ChartData
+        };
 
         // $routeParams.chartType == BarChart or PieChart or ColumnChart...
         $scope.chartObject.type = 'ColumnChart';
@@ -146,17 +149,52 @@ dashboardApp.controller('statController', function ($scope, $http, $resource) {
     Stat.get(function (response) {
 
         $scope.voters = response.db_stat.numberOfVoters;
-        $scope.avoters =  response.db_stat.voted;
-        if(response.state)
-        {
+        $scope.avoters = response.db_stat.voted;
+        if (response.state) {
             $scope.vstate = "ON";
         }
-        else
-        {
+        else {
             $scope.vstate = "OFF";
         }
     });
-
-
 });
+
+// *************************************************************************************************************** //
+
+dashboardApp.controller('votersController', function ($scope, $http, $resource) {
+
+    $scope.voterstbl = [];
+
+    $scope.global = {
+        graphstate: false
+    };
+
+    var VT = $resource('/voters');
+
+    VT.get(function (response) {
+    });
+
+    jQuery.ajax({
+        url: "/voters",
+    }).done(function (data) {
+        data.forEach(function (element, index, array) {
+            $scope.voterstbl.push({
+                "User": element.userName,
+                "EmployeeNumber": element.emp_number,
+                "Email": element.email,
+                "Rating": element.rating
+            });
+
+        });
+        $scope.global.graphstate = true;
+
+    });
+
+        $scope.addRow = function () {
+        };
+        $scope.removeRow = function (name) {
+        };
+
+    });
+
 

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+
+<link rel="stylesheet" href="/css/dashboard.css"/>
+
+<div ng-hide="global.graphstate" >
+    <p class="blink">Loading....</p>
+</div>
+
+<div ng-show="global.graphstate" ng-app="dashboardApp" ng-controller="votersController">
+
+        <div style="padding:20px 0px 60px 0px" align="center" >
+            <span class="col-md-1" style="font-weight:bold" align="center">Search</span>
+			<span class="col-md-3">
+			<input type="text" class="form-control ng-valid ng-dirty" align="center" ng-model="searchKeyword" dir="rtl">
+			</span>
+        </div>
+
+    <table class="tg" align="center" id="voterstbl">
+        <tr>
+            <th>User</th>
+            <th>Employee Number</th>
+            <th>Email</th>
+            <th>Rating</th>
+        </tr>
+        <tr ng-repeat="voter in voterstbl | filter: searchKeyword ">
+            <td>{{ voter.User }} </td>
+            <td>{{ voter.EmployeeNumber }} </td>
+            <td>{{ voter.Email }} </td>
+            <td>{{ voter.Rating }} </td>
+            <td>
+                <input type="button" value="Reset Voting" class="btn btn-primary" ng-click="removeRow(company.name)"/>
+            </td>
+        </tr>
+    </table>
+
+</div>
+
+
+
+
+</body>
+</html>

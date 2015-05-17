@@ -66,10 +66,26 @@ var REST_GetVoterInfo = function (req, res) {
 
     // user id query field is mandatory
     if (!req.query.id) {
-        cfg.logError('REST', "REST_GetVoterInfo user id " + req.query.id + " is missing");
-        res.json({result: "Error: User ID query string parameter is mandatory"});
+        // cfg.logError('REST', "REST_GetVoterInfo user id " + req.query.id + " is missing");
+        var Result = [];
+        logic.listVoters(function (err, item) {
+            item.forEach(function (element, index, array) {
+                Result.push({
+                    userName :element.userName
+                    ,emp_number: element.emp_number
+                    , email: element.email
+                    , rating : JSON.stringify(element.rating)
+                });
+                if(index == array.length-1)
+                {
+                    res.json(Result);
+                }
+            });
+        });
+        // res.json({result: "Error: User ID query string parameter is mandatory"});
         return;
     }
+
 
     // look for specific user in database
     logic.findVoter(req.query.id, function (err, voter) {
@@ -209,6 +225,8 @@ var REST_GetStatistics = function (req, res) {
 
     });
 };
+
+
 
 
 module.exports.REST_GetVotingSummary = REST_GetVotingSummary;

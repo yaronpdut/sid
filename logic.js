@@ -71,6 +71,16 @@ var findVoter = function (theUserName, callback) {
 
 };
 
+var listVoters = function (callback) {
+
+    // create in-sensitive case search using regular expression
+    doFind("voters", {}, function (err, item) {
+            callback(err, item);
+    });
+};
+
+
+
 // each user is associated with one project - in projct field
 // in order to get project members, query voters for specific project
 
@@ -379,4 +389,5 @@ module.exports.dbGetVotesResults = dbGetVotesResults;
 module.exports.dbGetProjects = dbGetProjects;
 module.exports.dbGetAllProjects = dbGetAllProjects;
 module.exports.dbNumberOfVoters = dbNumberOfVoters;
+module.exports.listVoters = listVoters;
 
