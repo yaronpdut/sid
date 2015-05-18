@@ -51,6 +51,16 @@ var REST_CheckUserCredentials = function (req, res) {
 };
 
 
+
+
+var REST_ResetVoterRating = function (req, res) {
+    cfg.logInfo('REST', 'REST_ResetVoterRating');
+    logic.dbResetRating(req.query.id, function (VotingResultSet) {
+        res.json(VotingResultSet);
+    });
+};
+
+
 // return list of summaries votes
 
 var REST_GetVotingSummary = function (req, res) {
@@ -238,3 +248,4 @@ module.exports.REST_GetStatistics = REST_GetStatistics;
 module.exports.REST_GetProjectsList = REST_GetProjectsList;
 module.exports.REST_CheckUserCredentials = REST_CheckUserCredentials;
 module.exports.REST_SetVoteState = REST_SetVoteState;
+module.exports.REST_ResetVoterRating = REST_ResetVoterRating;

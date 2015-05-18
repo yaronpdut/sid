@@ -108,6 +108,7 @@ var theApplication = function() {
         self.routes['/stat']        = rest_routes.REST_GetStatistics;
         self.routes['/state']       = rest_routes.REST_SetVoteState;
         self.routes['/login']       = rest_routes.REST_CheckUserCredentials;
+        self.routes['/reset1']       = rest_routes.REST_ResetVoterRating;
 
         self.routes['/asciimo'] = function(req, res) {
             var link = "http://i.imgur.com/kmbjB.png";

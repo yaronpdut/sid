@@ -33,7 +33,7 @@
             <td>{{ voter.Email }} </td>
             <td>{{ voter.Rating }} </td>
             <td>
-                <input type="button" value="Reset Voting" class="btn btn-primary" ng-click="removeRow(company.name)"/>
+                <input type="button" value="Reset Voting" class="btn btn-primary" ng-click="removeRow(voter.Email, voter.EmployeeNumber)"/>
             </td>
         </tr>
     </table>

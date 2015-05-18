@@ -164,6 +164,25 @@ var dbUpdateVoterRecWithRating = function (user, voted_project, callback) {
     });
 };
 
+var dbResetRating = function (user, callback) {
+    console.log(cfg.getTimeStamp(), " dbResetRating updating vote record for " + user);
+
+    ConnectAndExec(function (db) {
+        var collection = db.collection('voters');
+
+        collection.updateOne(
+            { email: user },
+            {$unset: { "rating": ""}},
+            {},
+            function (err) {
+                cfg.logError('LOGIC', "dbResetRating:  " + err);
+                callback(err)
+            });
+    });
+};
+
+
+
 var dbUpdateVoterRecWithRatingEx = function (user, projects, callback) {
     cfg.logInfo("LOGIC", "dbUpdateVoterRecWithRating updating vote record for " + JSON.stringify(user));
 
@@ -340,7 +359,8 @@ var dbGetVotesResults = function (callback) {
             projectCode: 0,
             value: 0,
             weightValue: 0,
-            weightValue2: 0
+            weightValue2: 0,
+            weightValue3: 0
         });
 
     doFind('voters', findString, function (err, docs) {
@@ -361,6 +381,10 @@ var dbGetVotesResults = function (callback) {
                 if (j > 0) // from number 2
                 {
                     ratingResults[crt].weightValue2 += NOM;
+                }
+                if (j < 3)
+                {
+                    ratingResults[crt].weightValue3 += NOM-2;
                 }
                 NOM--;
 
@@ -390,4 +414,5 @@ module.exports.dbGetProjects = dbGetProjects;
 module.exports.dbGetAllProjects = dbGetAllProjects;
 module.exports.dbNumberOfVoters = dbNumberOfVoters;
 module.exports.listVoters = listVoters;
+module.exports.dbResetRating = dbResetRating;
 

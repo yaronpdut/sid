@@ -95,7 +95,8 @@ dashboardApp.controller('votesController', function ($scope, $http, $resource) {
                         projectCode: item.projectCode,
                         value: item.value,
                         weightValue: item.weightValue,
-                        weightValue2: item.weightValue2
+                        weightValue2: item.weightValue2,
+                        weightValue3: item.weightValue3
                     });
                 }
                 ChartData.push(
@@ -104,7 +105,8 @@ dashboardApp.controller('votesController', function ($scope, $http, $resource) {
                             {v: item.project_name},
                             {v: item.value},
                             {v: item.weightValue},
-                            {v: item.weightValue2}
+                            {v: item.weightValue2},
+                            {v: item.weightValue3}
                         ]
                     }
                 );
@@ -120,7 +122,8 @@ dashboardApp.controller('votesController', function ($scope, $http, $resource) {
                 {id: "t", label: "Project", type: "string"},
                 {id: "s", label: "Count", type: "number"},
                 {id: "s", label: "Weight", type: "number"},
-                {id: "s", label: "2...5", type: "number"}
+                {id: "s", label: "2...5", type: "number"},
+                {id: "s", label: "1...3", type: "number"}
             ], "rows": ChartData
         };
 
@@ -190,11 +193,21 @@ dashboardApp.controller('votersController', function ($scope, $http, $resource) 
 
     });
 
-        $scope.addRow = function () {
-        };
-        $scope.removeRow = function (name) {
-        };
+    $scope.addRow = function () {
+    };
 
-    });
+    $scope.removeRow = function (Email) {
+        jQuery.get("/reset1", {id: Email});
+        for(var i = 0; i < $scope.voterstbl.length; i++)
+        {
+            if($scope.voterstbl[i].Email == Email)
+            {
+                $scope.voterstbl[i].Rating = "";
+                return;
+            }
+        }
+    };
+
+});
 
 
