@@ -1,4 +1,4 @@
-# Documantation
+# Documentation
 
 The OpenShift `nodejs` cartridge documentation can be found at:
 
